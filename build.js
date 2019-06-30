@@ -297,6 +297,48 @@ g_langs = g_langs.concat(readdirs(`${settings.rootFolder}/lessons`)
     .filter(isLangFolder)
     .map(pathToLang));
 
+const extractHeader = (function() {
+  const headerRE = /([A-Z0-9_-]+): (.*?)$/i;
+
+  return function(content) {
+    const metaData = { };
+    const lines = content.split('\n');
+    for (;;) {
+      const line = lines[0].trim();
+      const m = headerRE.exec(line);
+      if (!m) {
+        break;
+      }
+      metaData[m[1].toLowerCase()] = m[2];
+      lines.shift();
+    }
+    return {
+      content: lines.join('\n'),
+      headers: metaData,
+    };
+  };
+}());
+
+const parseMD = function(content) {
+  return extractHeader(content);
+};
+
+const loadMD = function(contentFileName) {
+  const content = cache.readFileSync(contentFileName, 'utf-8');
+  const data = parseMD(content);
+  data.link = contentFileName.replace(/\\/g, '/').replace(/\.md$/, '.html');
+  return data;
+};
+
+function loadFiles(filenames) {
+  const byFilename = {};
+  filenames.forEach((fileName) => {
+    const data = loadMD(fileName);
+    byFilename[path.basename(fileName)] = data;
+  });
+  return byFilename;
+}
+
 const Builder = function(outBaseDir, options) {
 
   const g_articlesByLang = {};
@@ -306,48 +348,17 @@ const Builder = function(outBaseDir, options) {
   const g_langDB = {};
   const g_outBaseDir = outBaseDir;
   const g_origPath = options.origPath;
-  const g_originalByFileName = {};
 
   const toc = readHANSON('toc.hanson');
 
   // These are the english articles.
-  const g_origArticles = glob.sync(path.join(g_origPath, '*.md'))
+  const g_allOriginalArticlesFullPath = glob.sync(path.join(g_origPath, '*.md'))
+      .filter(a => !a.endsWith('index.md'));
+  const g_origArticles = g_allOriginalArticlesFullPath
       .map(a => path.basename(a))
-      .filter(a => a !== 'index.md')
       .filter(articleFilter);
-
-  const extractHeader = (function() {
-    const headerRE = /([A-Z0-9_-]+): (.*?)$/i;
-
-    return function(content) {
-      const metaData = { };
-      const lines = content.split('\n');
-      for (;;) {
-        const line = lines[0].trim();
-        const m = headerRE.exec(line);
-        if (!m) {
-          break;
-        }
-        metaData[m[1].toLowerCase()] = m[2];
-        lines.shift();
-      }
-      return {
-        content: lines.join('\n'),
-        headers: metaData,
-      };
-    };
-  }());
-
-  const parseMD = function(content) {
-    return extractHeader(content);
-  };
-
-  const loadMD = function(contentFileName) {
-    const content = cache.readFileSync(contentFileName, 'utf-8');
-    const data = parseMD(content);
-    data.link = contentFileName.replace(/\\/g, '/').replace(/\.md$/, '.html');
-    return data;
-  };
+  
+  const g_originalByFileName = loadFiles(g_allOriginalArticlesFullPath);
 
   function extractHandlebars(content) {
     const tripleRE = /\{\{\{.*?\}\}\}/g;
@@ -549,18 +560,7 @@ const Builder = function(outBaseDir, options) {
         .sync(filesSpec)
         .sort();
     const files = allFiles.filter(articleFilter);
-
-    const byFilename = {};
-    allFiles.forEach((fileName) => {
-      const data = loadMD(fileName);
-      byFilename[path.basename(fileName)] = data;
-    });
-
-    // HACK
-    if (extra.lang === 'en') {
-      Object.assign(g_originalByFileName, byFilename);
-      g_originalLangInfo = g_langInfo;
-    }
+    const byFilename = loadFiles(allFiles);
 
     function getLocalizedCategory(category) {
       const localizedCategory = g_langInfo.categoryMapping[category];
@@ -663,7 +663,8 @@ const Builder = function(outBaseDir, options) {
   };
 
   this.preProcess = function(langs) {
-     langs.forEach(getLanguageSelection);
+    langs.forEach(getLanguageSelection);
+    g_originalLangInfo = g_langDB['en'].langInfo;
   };
 
   this.process = function(options) {
