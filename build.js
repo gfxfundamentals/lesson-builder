@@ -26,9 +26,9 @@ const Handlebars = require('handlebars');
 const hanson     = require('hanson');
 const marked     = require('marked');
 const path       = require('path');
-const Promise    = require('promise');
 const sitemap    = require('sitemap');
 const utils      = require('./utils');
+const util       = require('util');
 const moment     = require('moment');
 const url        = require('url');
 const chalk      = require('chalk');
@@ -55,7 +55,7 @@ function failError(...args) {
   error(...args);
 }
 
-const executeP = Promise.denodeify(utils.execute);
+const executeP = util.promisify(utils.execute);
 
 marked.setOptions({
   rawHtml: true,
