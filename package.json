@@ -1,0 +1,42 @@
+{
+  "name": "@gfxfundamentals/lesson-builder",
+  "version": "1.0.0",
+  "description": "Article builder",
+  "main": "build.js",
+  "dependencies": {
+    "chalk": "^2.4.2",
+    "feed": "^2.0.2",
+    "glob": "^7.1.3",
+    "handlebars": "^4.0.12",
+    "hanson": "^1.1.1",
+    "inmemfilecache": "0.0.6",
+    "marked": "git://github.com/greggman/marked.git#raw-html",
+    "moment": "^2.23.0",
+    "sitemap": "git://github.com/greggman/sitemap.js#multiple-langs"
+  },
+  "devDependencies": {
+    "eslint": "^6.0.1",
+    "eslint-plugin-google-camelcase": "0.0.2",
+    "eslint-plugin-html": "^5.0.0",
+    "eslint-plugin-one-variable-per-var": "0.0.3",
+    "eslint-plugin-optional-comma-spacing": "0.0.4",
+    "eslint-plugin-require-trailing-comma": "0.0.1"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gfxfundamentals/lesson-builder.git"
+  },
+  "keywords": [
+    "builder",
+    "website"
+  ],
+  "author": "Gregg Tavares",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/gfxfundamentals/lesson-builder/issues"
+  },
+  "homepage": "https://github.com/gfxfundamentals/lesson-builder#readme"
+}
