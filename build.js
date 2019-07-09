@@ -541,7 +541,10 @@ const Builder = function(outBaseDir, options) {
         metaData['screenshot'] = `${settings.baseUrl}/${settings.rootFolder}/lessons/screenshots/${basename}${ext}`;
       }
     });
-    const output = templateManager.apply(templatePath, metaData);
+    let output = templateManager.apply(templatePath, metaData);
+    if (settings.postHTMLFn) {
+      output = settings.postHTMLFn(output);
+    }
     writeFileIfChanged(outFileName, output);
 
     return metaData;
