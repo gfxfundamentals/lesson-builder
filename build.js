@@ -593,7 +593,7 @@ const Builder = function(outBaseDir, options) {
         data = g_originalByFileName[fileName];
         link = addLangToLink(data.link);
       }
-      const toc = data.headers.toc;
+      const toc = data.headers.toc || data.headers.title;
       if (toc === '#') {
         return [...data.content.matchAll(/<a\s*id="(.*?)"\s*data-toc="(.*?)"\s*><\/a>/g)].map(([, id, title]) => {
           const hashlink = `${link}#${id}`;
