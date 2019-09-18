@@ -32,6 +32,9 @@ const util       = require('util');
 const moment     = require('moment');
 const url        = require('url');
 const chalk      = require('chalk');
+const sizeOfImage = require('image-size');
+const genThumbnail = require('@gfxfundamentals/thumbnail-gen');
+const { createCanvas, loadImage } = require('canvas');
 
 const g_errors = [];
 function error(...args) {
@@ -246,14 +249,14 @@ function articleFilter(f) {
 }
 
 
-const readdirs = function(dirpath) {
+const readDirs = function(dirPath) {
   const dirsOnly = function(filename) {
     const stat = fs.statSync(filename);
     return stat.isDirectory();
   };
 
   const addPath = function(filename) {
-    return path.join(dirpath, filename);
+    return path.join(dirPath, filename);
   };
 
   return fs.readdirSync(`${settings.rootFolder}/lessons`)
@@ -293,7 +296,7 @@ let g_langs = [
   },
 ];
 
-g_langs = g_langs.concat(readdirs(`${settings.rootFolder}/lessons`)
+g_langs = g_langs.concat(readDirs(`${settings.rootFolder}/lessons`)
     .filter(isLangFolder)
     .map(pathToLang));
 
@@ -351,13 +354,20 @@ const Builder = function(outBaseDir, options) {
 
   const toc = readHANSON('toc.hanson');
 
+  const g_siteThumbnailFilename = path.join(settings.rootFolder, 'lessons', 'resources', settings.siteThumbnail);
+  let g_siteThumbnailImage;
+  const g_siteThumbnail = {
+    url: `${settings.baseUrl}/${settings.rootFolder}/lessons/resources/${settings.siteThumbnail}`,
+    size: sizeOfImage(g_siteThumbnailFilename),
+  };
+
   // These are the english articles.
   const g_allOriginalArticlesFullPath = glob.sync(path.join(g_origPath, '*.md'))
       .filter(a => !a.endsWith('index.md'));
   const g_origArticles = g_allOriginalArticlesFullPath
       .map(a => path.basename(a))
       .filter(articleFilter);
-  
+
   const g_originalByFileName = loadFiles(g_allOriginalArticlesFullPath);
 
   function extractHandlebars(content) {
@@ -490,7 +500,7 @@ const Builder = function(outBaseDir, options) {
     });
   }
 
-  const applyTemplateToContent = function(templatePath, contentFileName, outFileName, opt_extra, data) {
+  const applyTemplateToContent = async function(templatePath, contentFileName, outFileName, opt_extra, data) {
     // Call prep's Content which parses the HTML. This helps us find missing tags
     // should probably call something else.
     //Convert(md_content)
@@ -533,14 +543,18 @@ const Builder = function(outBaseDir, options) {
     metaData['langInfo'] = g_langInfo;
     metaData['url'] = pageUrl;
     metaData['relUrl'] = relativeOutName;
-    metaData['screenshot'] = `${settings.baseUrl}/${settings.rootFolder}/lessons/resources/${settings.siteThumbnail}`;
+    metaData['screenshot'] = opt_extra.screenshot || g_siteThumbnail.url;
+    metaData['screenshotSize'] = opt_extra.screenshotSize || g_siteThumbnail.size;
     const basename = path.basename(contentFileName, '.md');
-    ['.jpg', '.png'].forEach(function(ext) {
+    for (const ext of ['.jpg', '.png']) {
       const filename = path.join(settings.rootFolder, 'lessons', 'screenshots', basename + ext);
       if (fs.existsSync(filename)) {
         metaData['screenshot'] = `${settings.baseUrl}/${settings.rootFolder}/lessons/screenshots/${basename}${ext}`;
+        const size = sizeOfImage(filename);
+        metaData['screenshotSize'] = size;
+        break;
       }
-    });
+    }
     let output = templateManager.apply(templatePath, metaData);
     if (settings.postHTMLFn) {
       output = settings.postHTMLFn(output);
@@ -550,15 +564,15 @@ const Builder = function(outBaseDir, options) {
     return metaData;
   };
 
-  const applyTemplateToFile = function(templatePath, contentFileName, outFileName, opt_extra) {
+  const applyTemplateToFile = async function(templatePath, contentFileName, outFileName, opt_extra) {
     console.log('processing: ', contentFileName);  // eslint-disable-line
     opt_extra = opt_extra || {};
     const data = loadMD(contentFileName);
-    const metaData = applyTemplateToContent(templatePath, contentFileName, outFileName, opt_extra, data);
+    const metaData = await applyTemplateToContent(templatePath, contentFileName, outFileName, opt_extra, data);
     g_articles.push(metaData);
   };
 
-  const applyTemplateToFiles = function(templatePath, filesSpec, extra) {
+  const applyTemplateToFiles = async function(templatePath, filesSpec, extra) {
     const allFiles = glob
         .sync(filesSpec)
         .sort();
@@ -596,8 +610,8 @@ const Builder = function(outBaseDir, options) {
       const toc = data.headers.toc || data.headers.title;
       if (toc === '#') {
         return [...data.content.matchAll(/<a\s*id="(.*?)"\s*data-toc="(.*?)"\s*><\/a>/g)].map(([, id, title]) => {
-          const hashlink = `${link}#${id}`;
-          return `<li><a href="/${hashlink}">${title}</a></li>`;
+          const hashLink = `${link}#${id}`;
+          return `<li><a href="/${hashLink}">${title}</a></li>`;
         }).join('\n');
       }
       return `<li><a href="/${link}">${toc}</a></li>`;
@@ -617,8 +631,17 @@ const Builder = function(outBaseDir, options) {
     }
 
     g_langInfo.tocHtml = `<ul>${makeToc(toc)}</ul>`;
+    g_langInfo.carousel = JSON.stringify([...g_langInfo.tocHtml.matchAll(/<a href="(.*?)"/g)]
+      .filter(m => !m[1].includes('#'))
+      .map((m, ndx) => {
+        return {
+          '@type': 'ListItem',
+          'position': ndx + 1,
+          'url': `${settings.baseUrl}${m[1]}`,
+        };
+      }), null, 2);
 
-    files.forEach(function(fileName) {
+    for (const fileName of files) {
       const ext = path.extname(fileName);
       if (!byFilename[path.basename(fileName)]) {
         if (!hackyProcessSelectFiles) {
@@ -629,8 +652,27 @@ const Builder = function(outBaseDir, options) {
 
       const baseName = fileName.substr(0, fileName.length - ext.length);
       const outFileName = path.join(outBaseDir, baseName + '.html');
-      applyTemplateToFile(templatePath, fileName, outFileName, extra);
-    });
+
+      {
+        const data = loadMD(fileName);
+        g_siteThumbnailImage = g_siteThumbnailImage || await loadImage(g_siteThumbnailFilename); // eslint-disable-line
+        const canvas = createCanvas(g_siteThumbnailImage.width, g_siteThumbnailImage.height);
+        genThumbnail(Object.assign({
+          backgroundImage: g_siteThumbnailImage,
+          canvas,
+          text: data.headers.toc || data.headers.title,
+        }, settings.thumbnailOptions));
+        const basename = path.basename(baseName);
+        const filename = path.join(settings.outDir, settings.rootFolder, 'lessons', 'screenshots', `${basename}_${g_langInfo.langCode}.jpg`);
+        const buf = canvas.toBuffer('image/jpeg', { quality: 0.8 });
+        console.log('---->', filename);
+        fs.writeFileSync(filename, buf);
+        extra['screenshot'] = `${settings.baseUrl}/${settings.rootFolder}/lessons/screenshots/${path.basename(filename)}`;
+        extra['screenshotSize'] = { width: g_siteThumbnailImage.width, height: g_siteThumbnailImage.height };
+      }
+
+      await applyTemplateToFile(templatePath, fileName, outFileName, extra);
+    }
 
   };
 
@@ -670,12 +712,12 @@ const Builder = function(outBaseDir, options) {
     g_originalLangInfo = g_langDB['en'].langInfo;
   };
 
-  this.process = function(options) {
+  this.process = async function(options) {
     console.log('Processing Lang: ' + options.lang);  // eslint-disable-line
     g_articles = [];
     g_langInfo = g_langDB[options.lang].langInfo;
 
-    applyTemplateToFiles(options.template, path.join(options.lessons, settings.lessonGrep), options);
+    await applyTemplateToFiles(options.template, path.join(options.lessons, settings.lessonGrep), options);
 
     const articlesFilenames = g_articles.map(a => path.basename(a.src_file_name));
 
@@ -717,12 +759,12 @@ const Builder = function(outBaseDir, options) {
     }
 
     if (hackyProcessSelectFiles) {
-      return Promise.resolve();
+      return;
     }
 
     // generate place holders for non-translated files
     const missing = g_origArticles.filter(name => articlesFilenames.indexOf(name) < 0);
-    missing.forEach(name => {
+    for (const name of missing) {
       const ext = path.extname(name);
       const baseName = name.substr(0, name.length - ext.length);
       const outFileName = path.join(outBaseDir, options.lessons, baseName + '.html');
@@ -733,13 +775,13 @@ const Builder = function(outBaseDir, options) {
         toc: options.toc,
       };
       console.log('  generating missing:', outFileName);  // eslint-disable-line
-      applyTemplateToContent(
+      await applyTemplateToContent(
           'build/templates/missing.template',
           path.join(options.lessons, 'langinfo.hanson'),
           outFileName,
           extra,
           data);
-    });
+    }
 
     function utcMomentFromGitLog(result, filename, timeType) {
       const dateStr = result.stdout.split('\n')[0].trim();
@@ -782,80 +824,65 @@ const Builder = function(outBaseDir, options) {
        };
     }));
 
-    return tasks.reduce(function(cur, next){
-        return cur.then(next);
-    }, Promise.resolve()).then(function() {
-      let articles = g_articles.filter(function(article) {
-        return article.dateAdded !== undefined;
-      });
-      articles = articles.sort(function(a, b) {
-        return b.dateAdded - a.dateAdded;
+    for (const task of tasks) {
+      await task();
+    }
+    let articles = g_articles.filter(function(article) {
+      return article.dateAdded !== undefined;
+    });
+    articles = articles.sort(function(a, b) {
+      return b.dateAdded - a.dateAdded;
+    });
+
+    if (articles.length) {
+      const feed = new Feed({
+        title:          g_langInfo.title,
+        description:    g_langInfo.description,
+        link:           g_langInfo.link,
+        image:          `${settings.baseUrl}/${settings.rootFolder}/lessons/resources/${settings.siteThumbnail}`,
+        date:           articles[0].dateModified.toDate(),
+        published:      articles[0].dateModified.toDate(),
+        updated:        articles[0].dateModified.toDate(),
+        author: {
+          name:       `${settings.siteName} Contributors`,
+          link:       `${settings.baseUrl}/contributors.html`,
+        },
       });
 
-      if (articles.length) {
-        const feed = new Feed({
-          title:          g_langInfo.title,
-          description:    g_langInfo.description,
-          link:           g_langInfo.link,
-          image:          `${settings.baseUrl}/${settings.rootFolder}/lessons/resources/${settings.siteThumbnail}`,
-          date:           articles[0].dateModified.toDate(),
-          published:      articles[0].dateModified.toDate(),
-          updated:        articles[0].dateModified.toDate(),
-          author: {
-            name:       `${settings.siteName} Contributors`,
-            link:       `${settings.baseUrl}/contributors.html`,
-          },
+      articles.forEach(function(article) {
+        feed.addItem({
+          title:          article.title,
+          link:           `${settings.baseUrl}${article.dst_file_name}`,
+          description:    '',
+          author: [
+            {
+              name:       `${settings.siteName} Contributors`,
+              link:       `${settings.baseUrl}/contributors.html`,
+            },
+          ],
+          // contributor: [
+          // ],
+          date:           article.dateModified.toDate(),
+          published:      article.dateAdded.toDate(),
+          // image:          posts[key].image
         });
 
-        articles.forEach(function(article) {
-          feed.addItem({
-            title:          article.title,
-            link:           `${settings.baseUrl}${article.dst_file_name}`,
-            description:    '',
-            author: [
-              {
-                name:       `${settings.siteName} Contributors`,
-                link:       `${settings.baseUrl}/contributors.html`,
-              },
-            ],
-            // contributor: [
-            // ],
-            date:           article.dateModified.toDate(),
-            published:      article.dateAdded.toDate(),
-            // image:          posts[key].image
-          });
-
-          addArticleByLang(article, options.lang);
-        });
-
-        try {
-          const outPath = path.join(g_outBaseDir, options.lessons, 'atom.xml');
-          console.log('write:', outPath);  // eslint-disable-line
-          writeFileIfChanged(outPath, feed.atom1());
-        } catch (err) {
-          return Promise.reject(err);
-        }
-      } else {
-        console.log('no articles!');  // eslint-disable-line
-      }
-
-      return Promise.resolve();
-    }).then(function() {
-      // this used to insert a table of contents
-      // but it was useless being auto-generated
-      applyTemplateToFile('build/templates/index.template', path.join(options.lessons, 'index.md'), path.join(g_outBaseDir, options.lessons, 'index.html'), {
-        table_of_contents: '',
-        templateOptions: g_langInfo,
-        tocHtml: g_langInfo.tocHtml,
+        addArticleByLang(article, options.lang);
       });
-      return Promise.resolve();
-    }, function(err) {
-      failError('ERROR!:');
-      failError(err);
-      if (err.stack) {
-        failError(err.stack);  // eslint-disable-line
-      }
-      throw new Error(err.toString());
+
+      const outPath = path.join(g_outBaseDir, options.lessons, 'atom.xml');
+      console.log('write:', outPath);  // eslint-disable-line
+      writeFileIfChanged(outPath, feed.atom1());
+    } else {
+      console.log('no articles!');  // eslint-disable-line
+    }
+
+    // this used to insert a table of contents
+    // but it was useless being auto-generated
+    await applyTemplateToFile('build/templates/index.template', path.join(options.lessons, 'index.md'), path.join(g_outBaseDir, options.lessons, 'index.html'), {
+      table_of_contents: '',
+      templateOptions: g_langInfo,
+      tocHtml: g_langInfo.tocHtml,
     });
   };
 
@@ -874,12 +901,6 @@ const Builder = function(outBaseDir, options) {
       articleLangs[filename] = langs;
       sm.add(article);
     });
-    // var langInfo = {
-    //   articles: articleLangs,
-    //   langs: g_langDB,
-    // };
-    // var langJS = 'window.langDB = ' + JSON.stringify(langInfo, null, 2);
-    // writeFileIfChanged(path.join(g_outBaseDir, 'langdb.js'), langJS);
     writeFileIfChanged(path.join(g_outBaseDir, 'sitemap.xml'), sm.toString());
     copyFile(path.join(g_outBaseDir, `${settings.rootFolder}/lessons/atom.xml`), path.join(g_outBaseDir, 'atom.xml'));
     copyFile(path.join(g_outBaseDir, `${settings.rootFolder}/lessons/index.html`), path.join(g_outBaseDir, 'index.html'));
