@@ -356,7 +356,7 @@ const Builder = function(outBaseDir, options) {
 
   const toc = readHANSON('toc.hanson');
 
-  const g_siteThumbnailFilename = path.join(settings.rootFolder, 'lessons', 'resources', settings.siteThumbnail);
+  const g_siteThumbnailFilename = path.join(settings.rootFolder, 'lessons', 'resources', settings.thumbnailOptions.thumbnailBackground || settings.siteThumbnail);
   let g_siteThumbnailImage;
   const g_siteThumbnail = {
     url: `${settings.baseUrl}/${settings.rootFolder}/lessons/resources/${settings.siteThumbnail}`,
@@ -659,10 +659,10 @@ const Builder = function(outBaseDir, options) {
         const data = loadMD(fileName);
         g_siteThumbnailImage = g_siteThumbnailImage || await loadImage(g_siteThumbnailFilename); // eslint-disable-line
         const canvas = createCanvas(g_siteThumbnailImage.width, g_siteThumbnailImage.height);
+        settings.thumbnailOptions.text[0].text = data.headers.toc || data.headers.title;
         genThumbnail(Object.assign({
           backgroundImage: g_siteThumbnailImage,
           canvas,
-          text: data.headers.toc || data.headers.title,
         }, settings.thumbnailOptions));
         const basename = path.basename(baseName);
         const filename = path.join(settings.outDir, settings.rootFolder, 'lessons', 'screenshots', `${basename}_${g_langInfo.langCode}.jpg`);
