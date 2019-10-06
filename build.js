@@ -35,6 +35,7 @@ const chalk      = require('chalk');
 const sizeOfImage = require('image-size');
 const genThumbnail = require('@gfxfundamentals/thumbnail-gen');
 const { createCanvas, loadImage } = require('canvas');
+const g_cacheid = Date.now();
 
 const g_errors = [];
 function error(...args) {
@@ -188,6 +189,7 @@ Handlebars.registerHelper('example', function(options) {
   options.hash.examplePath = options.data.root.examplePath;
   options.hash.encodedUrl = encodeURIComponent(encodeUrl(options.hash.url));
   options.hash.url = encodeUrl(options.hash.url);
+  options.hash.cacheid = g_cacheid;
   options.hash.params = encodeParams({
     startPane: options.hash.startPane,
   });
