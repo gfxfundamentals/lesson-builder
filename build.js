@@ -31,22 +31,25 @@ const utils      = require('./utils');
 const util       = require('util');
 const moment     = require('moment');
 const url        = require('url');
-const chalk      = require('chalk');
+const colors     = require('ansi-colors');
+const colorSupport = require('color-support');
 const sizeOfImage = require('image-size');
 const genThumbnail = require('@gfxfundamentals/thumbnail-gen');
 const { createCanvas, loadImage } = require('canvas');
 const g_cacheid = Date.now();
 
+colors.enabled = colorSupport.hasBasic;
+
 const g_errors = [];
 function error(...args) {
   g_errors.push([...args].join(' '));
-  console.error(chalk.red(...args));  // eslint-disable-line no-console
+  console.error(colors.red(...args));  // eslint-disable-line no-console
 }
 
 const g_warnings = [];
 function warn(...args) {
   g_warnings.push([...args].join(' '));
-  console.warn(chalk.yellow(...args));  // eslint-disable-line no-console
+  console.warn(colors.yellow(...args));  // eslint-disable-line no-console
 }
 
 function log(...args) {
