@@ -1,4 +1,4 @@
-/* global module require process */
+/* global module require process __dirname */
 /* eslint no-undef: "error" */
 
 /*
@@ -35,10 +35,12 @@ const colors     = require('ansi-colors');
 const colorSupport = require('color-support');
 const sizeOfImage = require('image-size');
 const genThumbnail = require('@gfxfundamentals/thumbnail-gen');
-const { createCanvas, loadImage } = require('canvas');
+const { createCanvas, loadImage, registerFont } = require('canvas');
 const g_cacheid = Date.now();
 
 colors.enabled = colorSupport.hasBasic;
+
+registerFont(path.join(__dirname, 'fonts', 'KlokanTechNotoSansCJK-Bold.otf'), { family: 'lesson-font' });
 
 const g_errors = [];
 function error(...args) {
