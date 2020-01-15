@@ -432,7 +432,7 @@ const Builder = function(outBaseDir, options) {
   // happen in translations
   const iframeLinkRE = /(<iframe[\s\S]*?\s+src=")(.*?)(")/g;
   const imgLinkRE = /(<img[\s\S]*?\s+src=")(.*?)(")/g;
-  const aLinkRE = /(<a[\s\S]*?\s+href=")(.*?)(")/g;
+  const aLinkRE = /(<a[^>]*?\s+href=")(.*?)(")/g;
   const mdLinkRE = /(\[[\s\S]*?\]\()(.*?)(\))/g;
   const handlebarLinkRE = /({{{.*?\s+url=")(.*?)(")/g;
   const linkREs = [
