@@ -609,10 +609,10 @@ const Builder = function(outBaseDir, options) {
       let data = byFilename[fileName];
       let link;
       if (data) {
-        link = data.link;
+        link = data.headers.link || data.link;
       } else {
         data = g_originalByFileName[fileName];
-        link = addLangToLink(data.link);
+        link = data.headers.link || addLangToLink(data.link);
       }
       const toc = data.headers.toc || data.headers.title;
       if (toc === '#') {
