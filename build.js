@@ -187,6 +187,16 @@ Handlebars.registerHelper('include', function(filename, options) {
   return templateManager.apply(filename, context);
 });
 
+Handlebars.registerHelper('ifexists', function(options) {
+  const filename = path.join(process.cwd(), replaceParams(options.hash.filename, options.hash));
+  const exists = fs.existsSync(filename);
+  if (exists) {
+    return options.fn(this);
+  } else {
+    return options.inverse(this);
+  }
+});
+
 Handlebars.registerHelper('example', function(options) {
   options.hash.width   = options.hash.width  ? 'width:  ' + options.hash.width  + 'px;' : '';
   options.hash.height  = options.hash.height ? 'height: ' + options.hash.height + 'px;' : '';
@@ -705,6 +715,7 @@ const Builder = function(outBaseDir, options) {
     const lessons = lang.lessons;
     const langInfo = readHANSON(path.join(lessons, 'langinfo.hanson'));
     langInfo.langCode = langInfo.langCode || lang.lang;
+    langInfo.baseDirname = lang.lang;
     langInfo.home = lang.home;
     g_langDB[lang.lang] = {
       lang: lang.lang,
