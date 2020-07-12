@@ -196,7 +196,9 @@ Yes: this should be renamed to `toc.template` 😅
 ## index.md
 
 This is the language specific content of index.html for each
-language. Example:
+language that gets inserted as `content` into the index.template.
+
+Example:
 
 ```md
 Title: WebGL Fundamentals
