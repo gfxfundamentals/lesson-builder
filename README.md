@@ -246,6 +246,23 @@ async function main() {}
 }
 ```
 
+You can build specific lessons by passing in an array of filenames
+in the settings 
+
+```js
+{
+  ...
+  filenames: [
+    'some-article.md',
+    'another-article.md',
+  ];
+}
+```
+
+This is mostly to facilitate a continuous build. If you monitor
+for lesson article changing then you can pass the list of changed
+files to build just those files.
+
 Note: the builder only builds the index.html, lessons html, sitemap.xml, link-check.html. It does not copy any other files.
 (examples, images, etc...). Use other build tools for that.
 
@@ -370,3 +387,18 @@ Available to the templates are the following variables.
 
 * `selected`: Inserts the word `selected`. See `langs`
 
+## Debugging 
+
+You can set the following environment variables to help find
+issues.
+
+* `ARTICLE_FILTER`: only articles with this substring in the filename will be built
+
+* `ARTICLE_VERBOSE`: Set to 1, Prints more info (not much though)
+
+* `ARTICLE_FIX`: Set to 1, Tries to fix URLS
+
+  I don't totally remember what this is for but it loads
+  an lesson .md file, tries to fix some URLs, then writes
+  that .md file back out. So, be sure your originals are
+  checked into git.
