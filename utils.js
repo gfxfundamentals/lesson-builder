@@ -28,10 +28,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-"use strict";
-
-var fs = require('fs');
-var path = require('path');
+'use strict';
 
 var execute = function(cmd, args, callback) {
   var spawn = require('child_process').spawn;
@@ -41,23 +38,23 @@ var execute = function(cmd, args, callback) {
   var stderr = [];
 
   proc.stdout.setEncoding('utf8');
-  proc.stdout.on('data', function (data) {
+  proc.stdout.on('data', function(data) {
       var str = data.toString()
       var lines = str.split(/(\r?\n)/g);
       stdout = stdout.concat(lines);
   });
 
   proc.stderr.setEncoding('utf8');
-  proc.stderr.on('data', function (data) {
+  proc.stderr.on('data', function(data) {
       var str = data.toString()
       var lines = str.split(/(\r?\n)/g);
       stderr = stderr.concat(lines);
   });
 
-  proc.on('close', function (code) {
-    var result = {stdout: stdout.join("\n"), stderr: stderr.join("\n")};
+  proc.on('close', function(code) {
+    var result = {stdout: stdout.join('\n'), stderr: stderr.join('\n')};
     if (parseInt(code) != 0) {
-      callback("exit code " + code, result)
+      callback('exit code ' + code, result)
     } else {
       callback(null, result)
     }

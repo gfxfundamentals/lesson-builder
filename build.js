@@ -530,7 +530,8 @@ const Builder = function(outBaseDir, options) {
     let html = marked(info.content);
     // HACK! :-(
     // There's probably a way to do this in marked
-    html = html.replace(/<pre><code/g, '<pre class="prettyprint"><code');
+    html = html.replace(/<pre><code/g, '<pre class="prettyprint" translate="no"><code');
+    html = html.replace(/<code>/g, '<code translate="no">');
     // HACK! :-(
     if (opt_extra && opt_extra.home && opt_extra.home.length > 1) {
       html = hackRelLinks(html, pageUrl);
