@@ -445,24 +445,32 @@ const Builder = function(outBaseDir, options) {
   const aLinkRE = /(<a[^>]*?\s+href=")(.*?)(")/g;
   const mdLinkRE = /(\[[\s\S]*?\]\()(.*?)(\))/g;
   const handlebarLinkRE = /({{{.*?\s+url=")(.*?)(")/g;
+  const scriptLinkRE = /(<script[\s\S]*?\s+src=")(.*?)(")/g;
+  const linkRE = /(<link[\s\S]*?\s+href=")(.*?)(")/g;
   const linkREs = [
     iframeLinkRE,
     imgLinkRE,
     aLinkRE,
     mdLinkRE,
     handlebarLinkRE,
+    scriptLinkRE,
+    linkRE,
   ];
-  function hackRelLinks(content, pageUrl) {
+  function hackRelLinks(content, pageUrl, contentFileName) {
+    //const basedir = path.dirname(contentFileName);
     // console.log('---> pageUrl:', pageUrl);
     function fixRelLink(m, prefix, url, suffix) {
       if (isSameDomain(url, pageUrl)) {
         // a link that starts with "../" should be "../../" if it's in a translation
         // a link that starts with "resources" should be "../resources" if it's in a translation
-        if (url.startsWith('../') ||
-            url.startsWith('resources')) {
-          // console.log('  url:', url);
-          return `${prefix}../${url}${suffix}`;
-        }
+        //const testName = path.join(basedir, url);
+        //if (!fs.existsSync(testName)) {
+          if (url.startsWith('../') ||
+              url.startsWith('resources')) {
+            // console.log('  url:', url);
+            return `${prefix}../${url}${suffix}`;
+          }
+        //}
       }
       return m;
     }
@@ -470,7 +478,9 @@ const Builder = function(outBaseDir, options) {
     return content
         .replace(imgLinkRE, fixRelLink)
         .replace(aLinkRE, fixRelLink)
-        .replace(iframeLinkRE, fixRelLink);
+        .replace(iframeLinkRE, fixRelLink)
+        .replace(scriptLinkRE, fixRelLink)
+        .replace(linkRE, fixRelLink);
   }
 
   /**
@@ -534,7 +544,7 @@ const Builder = function(outBaseDir, options) {
     html = html.replace(/<code>/g, '<code class="notranslate" translate="no">');
     // HACK! :-(
     if (opt_extra && opt_extra.home && opt_extra.home.length > 1) {
-      html = hackRelLinks(html, pageUrl);
+      html = hackRelLinks(html, pageUrl, contentFileName);
     }
     html = insertHandlebars(info, html);
     html = replaceParams(html, [opt_extra, g_langInfo]);
