@@ -768,6 +768,9 @@ const Builder = function(outBaseDir, options) {
         let show = true;
         transLinks.forEach((link) => {
           if (!origLinks.has(link)) {
+            if (linkIsIndex(link)) {
+              return;
+            }
             if (show) {
               show = false;
               failError('---[', transMdFilename, ']---');
@@ -785,6 +788,12 @@ const Builder = function(outBaseDir, options) {
           fs.writeFileSync(transMdFilename, fixedMd);
         }
       });
+    }
+
+    function linkIsIndex(link) {
+      const index = `/${settings.rootFolder}/lessons/${options.lang}`;
+      const indexSlash = `${index}/`;
+      return link === index || link === indexSlash;
     }
 
     if (hackyProcessSelectFiles) {
