@@ -4,7 +4,7 @@ module.exports = {
     "es6": true
   },
   "parserOptions": {
-    "ecmaVersion": 2017
+    "ecmaVersion": 2019
   },
   "plugins": [
     "eslint-plugin-optional-comma-spacing",

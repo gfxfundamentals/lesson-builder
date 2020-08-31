@@ -180,7 +180,7 @@ Handlebars.registerHelper('include', function(filename, options) {
   if (options && options.hash && options.hash.filename) {
     const varName = options.hash.filename;
     filename = options.data.root[varName];
-    context = Object.assign({}, options.data.root, options.hash);
+    context = {...options.data.root, ...options.hash};
   } else {
     context = options.data.root;
   }
@@ -686,10 +686,11 @@ const Builder = function(outBaseDir, options) {
         g_siteThumbnailImage = g_siteThumbnailImage || await loadImage(g_siteThumbnailFilename); // eslint-disable-line
         const canvas = createCanvas(g_siteThumbnailImage.width, g_siteThumbnailImage.height);
         settings.thumbnailOptions.text[0].text = data.headers.toc || data.headers.title;
-        genThumbnail(Object.assign({
+        genThumbnail({
           backgroundImage: g_siteThumbnailImage,
           canvas,
-        }, settings.thumbnailOptions));
+          ...settings.thumbnailOptions
+        });
         const basename = path.basename(baseName);
         const filename = path.join(settings.outDir, settings.rootFolder, 'lessons', 'screenshots', `${basename}_${g_langInfo.langCode}.jpg`);
         const buf = canvas.toBuffer('image/jpeg', { quality: 0.8 });
@@ -806,7 +807,7 @@ const Builder = function(outBaseDir, options) {
       const ext = path.extname(name);
       const baseName = name.substr(0, name.length - ext.length);
       const outFileName = path.join(outBaseDir, options.lessons, baseName + '.html');
-      const data = Object.assign({}, loadMD(path.join(g_origPath, name)));
+      const data = {...loadMD(path.join(g_origPath, name))};
       data.content = g_langInfo.missing;
       const extra = {
         origLink: '/' + slashify(path.join(g_origPath, baseName + '.html')),
@@ -836,35 +837,28 @@ const Builder = function(outBaseDir, options) {
       return moment(stat[timeType]);
     }
 
-    const tasks = g_articles.map((article) => {
-      return function() {
-        return executeP('git', [
-          'log',
-          '--format="%ci"',
-          '--name-only',
-          '--diff-filter=A',
-          article.src_file_name,
-        ]).then((result) => {
-          article.dateAdded = utcMomentFromGitLog(result, article.src_file_name, 'ctime');
-        });
-      };
-    }).concat(g_articles.map((article) => {
-       return function() {
-         return executeP('git', [
+    for (const article of g_articles) {
+      {
+        const result = await executeP('git', [
+            'log',
+            '--format="%ci"',
+            '--name-only',
+            '--diff-filter=A',
+            article.src_file_name,
+        article.dateAdded = utcMomentFromGitLog(result, article.src_file_name, 'ctime');
+      }
+      {
+        const result = await executeP('git', [
            'log',
            '--format="%ci"',
            '--name-only',
            '--max-count=1',
            article.src_file_name,
-         ]).then((result) => {
-           article.dateModified = utcMomentFromGitLog(result, article.src_file_name, 'mtime');
-         });
-       };
-    }));
-
-    for (const task of tasks) {
-      await task();
+         ]);
+        article.dateModified = utcMomentFromGitLog(result, article.src_file_name, 'mtime');
+      }
     }
+
     let articles = g_articles.filter(function(article) {
       return article.dateAdded !== undefined;
     });
