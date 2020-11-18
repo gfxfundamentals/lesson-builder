@@ -689,7 +689,7 @@ const Builder = function(outBaseDir, options) {
         genThumbnail({
           backgroundImage: g_siteThumbnailImage,
           canvas,
-          ...settings.thumbnailOptions
+          ...settings.thumbnailOptions,
         });
         const basename = path.basename(baseName);
         const filename = path.join(settings.outDir, settings.rootFolder, 'lessons', 'screenshots', `${basename}_${g_langInfo.langCode}.jpg`);
@@ -845,6 +845,7 @@ const Builder = function(outBaseDir, options) {
             '--name-only',
             '--diff-filter=A',
             article.src_file_name,
+        ]);
         article.dateAdded = utcMomentFromGitLog(result, article.src_file_name, 'ctime');
       }
       {
