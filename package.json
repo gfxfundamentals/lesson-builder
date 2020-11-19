@@ -16,6 +16,7 @@
     "inmemfilecache": "0.0.6",
     "marked": "git://github.com/greggman/marked.git#raw-html",
     "moment": "^2.23.0",
+    "node-fetch": "^2.6.1",
     "sitemap": "git://github.com/greggman/sitemap.js.git#multiple-langs"
   },
   "devDependencies": {

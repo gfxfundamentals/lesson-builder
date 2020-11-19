@@ -31,6 +31,7 @@ const utils      = require('./utils');
 const util       = require('util');
 const moment     = require('moment');
 const url        = require('url');
+const fetch      = require('node-fetch');
 const colors     = require('ansi-colors');
 const colorSupport = require('color-support');
 const sizeOfImage = require('image-size');
@@ -491,7 +492,7 @@ const Builder = function(outBaseDir, options) {
     scriptLinkRE,
     linkRE,
   ];
-  function hackRelLinks(content, pageUrl, contentFileName) {
+  function hackRelLinks(content, pageUrl/*, contentFileName*/) {
     //const basedir = path.dirname(contentFileName);
     // console.log('---> pageUrl:', pageUrl);
     function fixRelLink(m, prefix, url, suffix) {
@@ -604,7 +605,9 @@ const Builder = function(outBaseDir, options) {
     metaData['tocHtml'] = g_langInfo.tocHtml;
     metaData['templateOptions'] = opt_extra.templateOptions;
     metaData['langInfo'] = g_langInfo;
+    metaData['originalLangInfo'] = g_originalLangInfo;
     metaData['url'] = pageUrl;
+    metaData['settings'] = settings;
     metaData['relUrl'] = relativeOutName;
     metaData['screenshot'] = opt_extra.screenshot || g_siteThumbnail.url;
     metaData['screenshotSize'] = opt_extra.screenshotSize || g_siteThumbnail.size;
@@ -954,7 +957,7 @@ const Builder = function(outBaseDir, options) {
     });
   };
 
-  this.writeGlobalFiles = function() {
+  this.writeGlobalFiles = async function() {
     const sm = sitemap.createSitemap({
       hostname: settings.baseUrl,
       cacheTime: 600000,
@@ -989,6 +992,66 @@ const Builder = function(outBaseDir, options) {
       `;
       writeFileIfChanged(filename, html);
     }
+
+    {
+      let data;
+      if (process.env.NODE_ENV === 'production') {
+        const {owner, repo} = settings;
+        const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/contributors`);
+        data = await res.json();
+      } else {
+        // just an example
+        data = [
+          {
+            'login': 'greggman',
+            'id': 234804,
+            'node_id': 'MDQ6VXNlcjIzNDgwNA==',
+            'avatar_url': 'https://avatars2.githubusercontent.com/u/234804?v=4',
+            'gravatar_id': '',
+            'url': 'https://api.github.com/users/greggman',
+            'html_url': 'https://github.com/greggman',
+            'followers_url': 'https://api.github.com/users/greggman/followers',
+            'following_url': 'https://api.github.com/users/greggman/following{/other_user}',
+            'gists_url': 'https://api.github.com/users/greggman/gists{/gist_id}',
+            'starred_url': 'https://api.github.com/users/greggman/starred{/owner}{/repo}',
+            'subscriptions_url': 'https://api.github.com/users/greggman/subscriptions',
+            'organizations_url': 'https://api.github.com/users/greggman/orgs',
+            'repos_url': 'https://api.github.com/users/greggman/repos',
+            'events_url': 'https://api.github.com/users/greggman/events{/privacy}',
+            'received_events_url': 'https://api.github.com/users/greggman/received_events',
+            'type': 'User',
+            'site_admin': false,
+            'contributions': 1100,
+          },
+          {
+            'login': 'PrincessGod',
+            'id': 20556748,
+            'node_id': 'MDQ6VXNlcjIwNTU2NzQ4',
+            'avatar_url': 'https://avatars2.githubusercontent.com/u/20556748?v=4',
+            'gravatar_id': '',
+            'url': 'https://api.github.com/users/PrincessGod',
+            'html_url': 'https://github.com/PrincessGod',
+            'followers_url': 'https://api.github.com/users/PrincessGod/followers',
+            'following_url': 'https://api.github.com/users/PrincessGod/following{/other_user}',
+            'gists_url': 'https://api.github.com/users/PrincessGod/gists{/gist_id}',
+            'starred_url': 'https://api.github.com/users/PrincessGod/starred{/owner}{/repo}',
+            'subscriptions_url': 'https://api.github.com/users/PrincessGod/subscriptions',
+            'organizations_url': 'https://api.github.com/users/PrincessGod/orgs',
+            'repos_url': 'https://api.github.com/users/PrincessGod/repos',
+            'events_url': 'https://api.github.com/users/PrincessGod/events{/privacy}',
+            'received_events_url': 'https://api.github.com/users/PrincessGod/received_events',
+            'type': 'User',
+            'site_admin': false,
+            'contributions': 79,
+          },
+        ];
+      }
+      const filename = path.join(settings.outDir, 'contributors.js');
+      const js = `
+const contributors = ${JSON.stringify(data)};
+`;
+      fs.writeFileSync(filename, js);
+    }
   };
 
 
@@ -1016,8 +1079,9 @@ async function main() {
       await b.process(lang);
     }
     if (!hackyProcessSelectFiles) {
-      b.writeGlobalFiles(g_langs);
+      await b.writeGlobalFiles(g_langs);
     }
+
     g_warnings.slice().forEach(str => warn(str));
     g_errors.slice().forEach(str => error(str));
     if (numErrors) {
