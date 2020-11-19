@@ -211,6 +211,41 @@ Handlebars.registerHelper('example', function(options) {
   return templateManager.apply('build/templates/example.template', options.hash);
 });
 
+function getProperty(obj, propSpec) {
+  const parts = propSpec.split('.');
+  let data = obj;
+  for (const part of parts) {
+    if (!Object.prototype.hasOwnProperty.call(data, part)) {
+      return undefined;
+    }
+    data = data[part];
+  }
+  return data;
+}
+
+function getPropertyOr(obj, propSpecs) {
+  const specs = propSpecs.split(',');
+  for (const spec of specs) {
+    const value = getProperty(obj, spec);
+    if (value !== undefined) {
+      return value;
+    }
+  }
+  return undefined;
+}
+
+// lets you insert build time data but stringified
+// const foo = {{{stringify names="langInfo"}}};
+// const title = {{{stringify names="langInfo.title"}}};
+// const title = {{{stringify names="langInfo.title,originalLangInfo.title"}}};
+Handlebars.registerHelper('stringify', function(options) {
+  const data = getPropertyOr(options.data.root, options.hash.names);
+  if (data === undefined) {
+    throw new Error(`no property '${options.hash.names}' for {{{stringify}}}`);
+  }
+  return JSON.stringify(data, null, 2);
+});
+
 Handlebars.registerHelper('diagram', function(options) {
 
   options.hash.width  = options.hash.width || '400';
