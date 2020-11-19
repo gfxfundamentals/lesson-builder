@@ -786,6 +786,12 @@ const Builder = function(outBaseDir, options) {
 
     const articlesFilenames = g_articles.map(a => path.basename(a.src_file_name));
 
+    function linkIsIndex(link) {
+      const index = `/${settings.rootFolder}/lessons/${options.lang}`;
+      const indexSlash = `${index}/`;
+      return link === index || link === indexSlash;
+    }
+
     // should do this first was easier to add here
     if (options.lang !== 'en') {
       const existing = g_origArticles.filter(name => articlesFilenames.indexOf(name) >= 0);
@@ -824,12 +830,6 @@ const Builder = function(outBaseDir, options) {
           fs.writeFileSync(transMdFilename, fixedMd);
         }
       });
-    }
-
-    function linkIsIndex(link) {
-      const index = `/${settings.rootFolder}/lessons/${options.lang}`;
-      const indexSlash = `${index}/`;
-      return link === index || link === indexSlash;
     }
 
     if (hackyProcessSelectFiles) {
