@@ -226,6 +226,8 @@ async function main() {}
     siteName: 'WebGLFundamentals',
     siteThumbnail: 'webglfundamentals.jpg',  // in rootFolder/lessons/resources 
     templatePath: 'build/templates',  // where the templates are
+    owner: 'gfxfundamentals',  // owner of git repo
+    repo: 'webgl-fundamentals',  // name of git repo
     thumbnailOptions: {
       thumbnailBackground: 'webglfundamentals.jpg',
       text: [
@@ -263,8 +265,19 @@ This is mostly to facilitate a continuous build. If you monitor
 for lesson article changing then you can pass the list of changed
 files to build just those files.
 
-Note: the builder only builds the index.html, lessons html, sitemap.xml, link-check.html. It does not copy any other files.
-(examples, images, etc...). Use other build tools for that.
+Note: the builder only builds `index.html`, the lesson html files, `sitemap.xml`,
+`link-check.html`, `contributors.html`, `contributors.js`, and `atom.xml`.
+It does not copy any other files. (examples, images, etc...). Use other build tools for that.
+
+`contributors.js` is [the list of contributors from github](https://docs.github.com/en/free-pro-team@latest/rest/reference/repos#list-repository-contributors). 
+By default this is bogus data of 2 entires. To get real data
+at build time set the environment variable `LESSON_BUILDER_ENV` to `production` in which case a request
+will be made to github. I would have preferred to use git but (a) git has no info about links to people.
+github at least as link I can insert. (b) git has no avatar links - I suppose here I could use gravatar
+but for now I opted to use github.
+
+`contributors.html` is build from `contributors.md` and inserted into the `index.template`.
+It just assumes `contributors.md` is a manually edited file.
 
 ## .templates
 
@@ -273,6 +286,8 @@ The main templates it expects are `index.template` which it uses for the index.h
 and `lesson.template` which it use for each lesson.
 
 Available to the templates are the following variables.
+
+* `settings` is the `buildSettings` passed into the builder (see above)
 
 * `langInfo` is the contents of the langinfo.hanson file above.
 
@@ -296,6 +311,18 @@ Available to the templates are the following variables.
   }
   </script>
   ```
+
+* `originalLangInfo` is the contents of the **english** langinfo.hanson file
+
+  This is useful in a template with the `stringify` helper as you can do
+  stuff like
+
+  ```html
+  <div>{{{stringify names="langInfo.toc,originalLangInfo.toc"}}}</div>
+  ```
+  
+  and have it insert either the language specific translation or
+  fallback to the english.
 
 * `content`: The .md file converted to HTML
 
@@ -323,8 +350,6 @@ Available to the templates are the following variables.
 * `title`: The title of the lesson from the .md front matter
 
 * `description`: The description of the less from the .md from matter
-
-* `toc` 
 
 * `src_file_name`: the .md file
 
@@ -386,6 +411,11 @@ Available to the templates are the following variables.
   Optionally takes a `caption`, and a `className`
 
 * `selected`: Inserts the word `selected`. See `langs`
+
+* `stringify`: Insert the `JSON.stringify(value)` of the named value.
+
+  example `const foo = {{{stringify names="langInfo.toc,originalLangInfo.toc"}}}`
+  will insert `langInfo.toc` if it exists else `originalLangInfo.toc` (the English)
 
 ## Debugging 
 
