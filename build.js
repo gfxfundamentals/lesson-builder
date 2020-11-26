@@ -1,4 +1,4 @@
-/* global module require process __dirname */
+/* global module require process __dirname global */
 /* eslint no-undef: "error" */
 
 /*
@@ -790,19 +790,27 @@ const Builder = function(outBaseDir, options) {
     const articlesFilenames = g_articles.map(a => path.basename(a.src_file_name));
 
     function linkIsIndex(link) {
-      const index = `/${settings.rootFolder}/lessons/${options.lang}`;
+      const base = `/${settings.rootFolder}/lessons/`;
+      const index = `${base}${options.lang}`;
       const indexSlash = `${index}/`;
-      return link === index || link === indexSlash;
+      console.log(index, indexSlash);
+      return link === index || link === indexSlash || link === base;
     }
 
     // should do this first was easier to add here
     if (options.lang !== 'en') {
       const existing = g_origArticles.filter(name => articlesFilenames.indexOf(name) >= 0);
       existing.forEach((name) => {
-        const origMdFilename = path.join(g_origPath, name);
+        //const origMdFilename = path.join(g_origPath, name);
         const transMdFilename = path.join(g_origPath, options.lang, name);
-        const origLinks = getLinks(loadMD(origMdFilename).content);
-        const transLinks = getLinks(loadMD(transMdFilename).content);
+
+        const ext = path.extname(name);
+        const baseName = name.substr(0, name.length - ext.length);
+        const originHTMLFilename = path.join(outBaseDir, g_langDB.en.basePath, baseName + '.html');
+        const transHTMLFilename = path.join(outBaseDir, options.lessons, baseName + '.html');
+
+        const origLinks = getLinks(readFile(originHTMLFilename));
+        const transLinks = getLinks(fs.readFileSync(transHTMLFilename, {encoding: 'utf8'}));
 
         if (process.env['ARTICLE_VERBOSE']) {
           log('---[', transMdFilename, ']---');
@@ -812,6 +820,9 @@ const Builder = function(outBaseDir, options) {
 
         let show = true;
         transLinks.forEach((link) => {
+          link = link
+              .replace(`${options.lang}/`, '')
+              .replace(/^..\//, '');
           if (!origLinks.has(link)) {
             if (linkIsIndex(link)) {
               return;
@@ -820,7 +831,7 @@ const Builder = function(outBaseDir, options) {
               show = false;
               failError('---[', transMdFilename, ']---');
             }
-            failError('   link:[', link, '] not found in English file');
+            failError(`   link:[${link}] not found in English file`);
           }
         });
 
