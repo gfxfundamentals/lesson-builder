@@ -1,4 +1,4 @@
-/* global module require process __dirname global */
+/* global module require process __dirname */
 /* eslint no-undef: "error" */
 
 /*
@@ -38,6 +38,7 @@ const sizeOfImage = require('image-size');
 const genThumbnail = require('@gfxfundamentals/thumbnail-gen');
 const { createCanvas, loadImage, registerFont } = require('canvas');
 const g_cacheid = Date.now();
+const packageJSON = JSON.parse(fs.readFileSync('package.json', {encoding: 'utf8'}));
 
 colors.enabled = colorSupport.hasBasic;
 
@@ -172,6 +173,20 @@ function TemplateManager() {
 
     return template(params);
   };
+
+  this.applyString = function(string, params) {
+    let template = templates[string];
+    if (!template) {
+      template = Handlebars.compile(string);
+      templates[string] = template;
+    }
+
+    if (Array.isArray(params)) {
+      params = mergeObjects.apply(null, params.slice().reverse());
+    }
+
+    return template(params);
+  };
 }
 
 const templateManager = new TemplateManager();
@@ -210,6 +225,31 @@ Handlebars.registerHelper('example', function(options) {
     startPane: options.hash.startPane,
   });
   return templateManager.apply('build/templates/example.template', options.hash);
+});
+
+function getTranslation(root, msgId) {
+  const lang = root.lang;
+  const translations = root.translations;
+  const origTranslations = root.origLangInfo.translations;
+  let str = translations[msgId];
+  if (!str) {
+    warn(`missing ${lang} translation for msgId: ${msgId}`);
+    str = origTranslations[msgId];
+    translations[msgId] = str;
+  }
+  return str;
+}
+
+Handlebars.registerHelper('warning', function(options) {
+  const root = options.data.root;
+  const translation = getTranslation(root, options.hash.msgId);
+  const msg = templateManager.applyString(translation, root);
+  const data = {
+    ...root,
+    msg,
+  };
+  const str = templateManager.apply('build/templates/warning.template', data);
+  return str;
 });
 
 function getProperty(obj, propSpec) {
@@ -583,7 +623,15 @@ const Builder = function(outBaseDir, options) {
       html = hackRelLinks(html, pageUrl, contentFileName);
     }
     html = insertHandlebars(info, html);
-    html = replaceParams(html, [opt_extra, g_langInfo]);
+    html = replaceParams(html, [
+      opt_extra,
+      g_langInfo,
+      {
+        origLangInfo: g_originalLangInfo,
+        contentFileName,
+        packageJSON,
+      },
+    ]);
     const pathRE = new RegExp(`^\\/${settings.rootFolder}\\/lessons\\/$`);
     const langs = Object.keys(g_langDB).map((name) => {
       const lang = g_langDB[name];
@@ -767,6 +815,7 @@ const Builder = function(outBaseDir, options) {
     langInfo.langCode = langInfo.langCode || lang.lang;
     langInfo.baseDirname = lang.lang;
     langInfo.home = lang.home;
+    langInfo.translations = langInfo.translations || {};
     g_langDB[lang.lang] = {
       lang: lang.lang,
       language: langInfo.language,
