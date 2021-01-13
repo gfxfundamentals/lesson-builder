@@ -128,6 +128,12 @@ The contents is
   // markdown that appears for untranslated articles
   missing: "Sorry this article has not been translated yet. [Translations Welcome](https://github.com/gfxfundamentals/webgl-fundamentals)! 😄\n\n[Here's the original English article for now]({{{origLink}}}).",
 
+  // various translations
+  translations: {
+    badTranslation: 'Sorry, the translation of this area is out of date. <a href="{{packageJSON.homepage}}/blob/master/{{contentFileName}}">Please consider helping to fix it</a>.',
+    updateNeeded: 'The translation of this article is out of date.  <a href="{{packageJSON.homepage}}/blob/master/{{contentFileName}}">Please consider helping to fix it</a>.',
+  },
+
   // the phrase "Table of Contents"
   toc: "Table of Contents",
 
@@ -416,6 +422,8 @@ Available to the templates are the following variables.
 
   example `const foo = {{{stringify names="langInfo.toc,originalLangInfo.toc"}}}`
   will insert `langInfo.toc` if it exists else `originalLangInfo.toc` (the English)
+
+* `warning`: Inserts the warning template with a translated message.
 
 ## Debugging 
 
