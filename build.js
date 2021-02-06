@@ -242,8 +242,9 @@ function getTranslation(root, msgId) {
 
 Handlebars.registerHelper('warning', function(options) {
   const root = options.data.root;
+  const link = options.hash.link || `${root.packageJSON.homepage}}/blob/master/{$root.contentFileName}`;
   const translation = getTranslation(root, options.hash.msgId);
-  const msg = templateManager.applyString(translation, root);
+  const msg = templateManager.applyString(translation, {...root, link});
   const data = {
     ...root,
     msg,
