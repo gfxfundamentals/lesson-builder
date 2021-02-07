@@ -843,7 +843,7 @@ const Builder = function(outBaseDir, options) {
       const base = `/${settings.rootFolder}/lessons/`;
       const index = `${base}${options.lang}`;
       const indexSlash = `${index}/`;
-      console.log(index, indexSlash);
+      //console.log(index, indexSlash);
       return link === index || link === indexSlash || link === base;
     }
 
