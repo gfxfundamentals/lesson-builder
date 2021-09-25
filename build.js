@@ -31,7 +31,6 @@ const utils      = require('./utils');
 const util       = require('util');
 const moment     = require('moment');
 const url        = require('url');
-const fetch      = require('node-fetch');
 const colors     = require('ansi-colors');
 const colorSupport = require('color-support');
 const sizeOfImage = require('image-size');
@@ -1119,6 +1118,8 @@ const contributors = ${JSON.stringify(data)};
 };
 
 async function main() {
+  const fetch = await import('node-fetch');
+
   const b = new Builder(settings.outDir, {
     origPath: `${settings.rootFolder}/lessons`,  // english articles
   });
