@@ -1061,6 +1061,7 @@ const Builder = function(outBaseDir, options) {
       writeFileIfChanged(filename, html);
     }
 
+    if (false)
     {
       let data;
       if (process.env.LESSON_BUILDER_ENV === 'production') {
