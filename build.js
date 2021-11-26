@@ -41,6 +41,8 @@ const packageJSON = JSON.parse(fs.readFileSync('package.json', {encoding: 'utf8'
 
 colors.enabled = colorSupport.hasBasic;
 
+//registerFont(path.join(__dirname, 'fonts', 'KlokanTechNotoSansCJK-Bold.otf'), { family: 'lesson-font' });
+
 const g_errors = [];
 function error(...args) {
   g_errors.push([...args].join(' '));
@@ -769,8 +771,8 @@ const Builder = function(outBaseDir, options) {
       const outFileName = path.join(outBaseDir, baseName + '.html');
 
       if (false) {
-        settings.thumbnailOptions.text[0].text = data.headers.toc || data.headers.title;
         const data = loadMD(fileName);
+        settings.thumbnailOptions.text[0].text = data.headers.toc || data.headers.title;
         //g_siteThumbnailImage = g_siteThumbnailImage || await loadImage(g_siteThumbnailFilename); // eslint-disable-line
         //const canvas = createCanvas(g_siteThumbnailImage.width, g_siteThumbnailImage.height);
         //settings.thumbnailOptions.text[0].text = data.headers.toc || data.headers.title;
