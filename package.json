@@ -6,10 +6,8 @@
   "dependencies": {
     "@gfxfundamentals/thumbnail-gen": "git://github.com/gfxfundamentals/thumbnail-gen.git#v1.0.3",
     "ansi-colors": "^4.1.1",
-    "canvas": "^2.8.0",
     "color-support": "^1.1.3",
-    "feed": "^2.0.2",
-    "glob": "^7.2.0",
+    "feed": "^2.0.4",
     "handlebars": "^4.7.7",
     "hanson": "^1.1.1",
     "image-size": "^1.0.0",
@@ -17,18 +15,20 @@
     "marked": "git://github.com/greggman/marked.git#raw-html",
     "moment": "^2.29.1",
     "node-fetch": "^3.0.0",
+    "puppeteer": "^11.0.0",
     "sitemap": "git://github.com/greggman/sitemap.js.git#multiple-langs"
   },
   "devDependencies": {
-    "eslint": "^6.8.0",
+    "eslint": "^8.3.0",
     "eslint-plugin-google-camelcase": "0.0.2",
-    "eslint-plugin-html": "^5.0.0",
+    "eslint-plugin-html": "^6.2.0",
     "eslint-plugin-one-variable-per-var": "0.0.3",
     "eslint-plugin-optional-comma-spacing": "0.0.4",
-    "eslint-plugin-require-trailing-comma": "0.0.1"
+    "eslint-plugin-require-trailing-comma": "0.0.1",
+    "mocha": "^9.1.3"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha test/tests"
   },
   "repository": {
     "type": "git",

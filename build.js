@@ -9,7 +9,7 @@ This entire file is one giant hack and really needs to be cleaned up!
 
 'use strict';
 
-const requiredNodeVersion = 12;
+const requiredNodeVersion = 16;
 if (parseInt((/^v(\d+)\./).exec(process.version)[1]) < requiredNodeVersion) {
   throw Error(`requires at least node: ${requiredNodeVersion}`);
 }
@@ -20,8 +20,7 @@ const hackyProcessSelectFiles = settings.filenames !== undefined;
 
 const cache      = new (require('inmemfilecache'))();
 const Feed       = require('feed').Feed;
-const fs         = require('fs');
-const glob       = require('glob');
+const fs         = settings.fs || require('fs');
 const Handlebars = require('handlebars');
 const hanson     = require('hanson');
 const marked     = require('marked');
@@ -35,13 +34,12 @@ const colors     = require('ansi-colors');
 const colorSupport = require('color-support');
 const sizeOfImage = require('image-size');
 const genThumbnail = require('@gfxfundamentals/thumbnail-gen');
-const { createCanvas, loadImage, registerFont } = require('canvas');
 const g_cacheid = Date.now();
 const packageJSON = JSON.parse(fs.readFileSync('package.json', {encoding: 'utf8'}));
 
 colors.enabled = colorSupport.hasBasic;
 
-registerFont(path.join(__dirname, 'fonts', 'KlokanTechNotoSansCJK-Bold.otf'), { family: 'lesson-font' });
+//registerFont(path.join(__dirname, 'fonts', 'KlokanTechNotoSansCJK-Bold.otf'), { family: 'lesson-font' });
 
 const g_errors = [];
 function error(...args) {
@@ -195,6 +193,9 @@ Handlebars.registerHelper('include', function(filename, options) {
   if (options && options.hash && options.hash.filename) {
     const varName = options.hash.filename;
     filename = options.data.root[varName];
+    if (filename === undefined) {
+      throw new Error(`no value for key "${varName}" in include macro`)
+    }
     context = {...options.data.root, ...options.hash};
   } else {
     context = options.data.root;
@@ -223,7 +224,7 @@ Handlebars.registerHelper('example', function(options) {
   options.hash.params = encodeParams({
     startPane: options.hash.startPane,
   });
-  return templateManager.apply('build/templates/example.template', options.hash);
+  return templateManager.apply(path.join(settings.templatePath, 'example.template'), options.hash);
 });
 
 function getTranslation(root, msgId) {
@@ -248,7 +249,7 @@ Handlebars.registerHelper('warning', function(options) {
     ...root,
     msg,
   };
-  const str = templateManager.apply('build/templates/warning.template', data);
+  const str = templateManager.apply(path.join(settings.templatePath, 'warning.template'), data);
   return str;
 });
 
@@ -295,7 +296,7 @@ Handlebars.registerHelper('diagram', function(options) {
   options.hash.className = options.hash.className || '';
   options.hash.url = encodeUrl(options.hash.url);
 
-  return templateManager.apply('build/templates/diagram.template', options.hash);
+  return templateManager.apply(path.join(settings.templatePath, 'diagram.template'), options.hash);
 });
 
 Handlebars.registerHelper('image', function(options) {
@@ -308,7 +309,7 @@ Handlebars.registerHelper('image', function(options) {
     options.hash.examplePath = '';
   }
 
-  return templateManager.apply('build/templates/image.template', options.hash);
+  return templateManager.apply(path.join(settings.templatePath, 'image.template'), options.hash);
 });
 
 Handlebars.registerHelper('selected', function(options) {
@@ -371,7 +372,7 @@ const pathToLang = function(filename) {
     lang,
     toc: `${settings.rootFolder}/lessons/${lang}/toc.html`,
     lessons: `${lessonBase}/${lang}`,
-    template: 'build/templates/lesson.template',
+    template: path.join(settings.templatePath, 'lesson.template'),
     examplePath: `/${lessonBase}/`,
     home: `/${lessons}/`,
   };
@@ -380,7 +381,7 @@ const pathToLang = function(filename) {
 let g_langs = [
   // English is special (sorry it's where I started)
   {
-    template: 'build/templates/lesson.template',
+    template: path.join(settings.templatePath, 'lesson.template'),
     lessons: `${settings.rootFolder}/lessons`,
     lang: 'en',
     toc: `${settings.rootFolder}/lessons/toc.html`,
@@ -445,7 +446,7 @@ const Builder = function(outBaseDir, options) {
   const g_outBaseDir = outBaseDir;
   const g_origPath = options.origPath;
 
-  const toc = readHANSON('toc.hanson');
+  const toc = readHANSON(settings.tocHanson || 'toc.hanson');
 
   const g_siteThumbnailFilename = path.join(settings.rootFolder, 'lessons', 'resources', settings.thumbnailOptions.thumbnailBackground || settings.siteThumbnail);
   let g_siteThumbnailImage;
@@ -455,7 +456,7 @@ const Builder = function(outBaseDir, options) {
   };
 
   // These are the english articles.
-  const g_allOriginalArticlesFullPath = glob.sync(path.join(g_origPath, '*.md'))
+  const g_allOriginalArticlesFullPath = utils.glob(path.join(g_origPath, '*.md'))
       .filter(a => !a.endsWith('index.md'));
   const g_origArticles = g_allOriginalArticlesFullPath
       .map(a => path.basename(a))
@@ -687,9 +688,7 @@ const Builder = function(outBaseDir, options) {
   };
 
   const applyTemplateToFiles = async function(templatePath, filesSpec, extra) {
-    const allFiles = glob
-        .sync(filesSpec)
-        .sort();
+    const allFiles = utils.glob(filesSpec).sort();
     const files = allFiles.filter(articleFilter);
     const byFilename = loadFiles(allFiles);
 
@@ -767,7 +766,7 @@ const Builder = function(outBaseDir, options) {
       const baseName = fileName.substr(0, fileName.length - ext.length);
       const outFileName = path.join(outBaseDir, baseName + '.html');
 
-      {
+      if (false) {
         const data = loadMD(fileName);
         g_siteThumbnailImage = g_siteThumbnailImage || await loadImage(g_siteThumbnailFilename); // eslint-disable-line
         const canvas = createCanvas(g_siteThumbnailImage.width, g_siteThumbnailImage.height);
@@ -913,7 +912,7 @@ const Builder = function(outBaseDir, options) {
       };
       console.log('  generating missing:', outFileName);  // eslint-disable-line
       await applyTemplateToContent(
-          'build/templates/missing.template',
+          path.join(settings.templatePath, 'missing.template'),
           path.join(options.lessons, 'langinfo.hanson'),
           outFileName,
           extra,
@@ -1010,7 +1009,8 @@ const Builder = function(outBaseDir, options) {
 
     // this used to insert a table of contents
     // but it was useless being auto-generated
-    await applyTemplateToFile('build/templates/index.template', path.join(options.lessons, 'index.md'), path.join(g_outBaseDir, options.lessons, 'index.html'), {
+    await applyTemplateToFile(path.join(settings.templatePath, 'index.template'), path.join(options.lessons, 'index.md'), path.join(g_outBaseDir, options.lessons, 'index.html'), {
+      toc: options.toc,
       table_of_contents: '',
       templateOptions: g_langInfo,
       tocHtml: g_langInfo.tocHtml,
@@ -1036,7 +1036,7 @@ const Builder = function(outBaseDir, options) {
     copyFile(path.join(g_outBaseDir, `${settings.rootFolder}/lessons/atom.xml`), path.join(g_outBaseDir, 'atom.xml'));
     copyFile(path.join(g_outBaseDir, `${settings.rootFolder}/lessons/index.html`), path.join(g_outBaseDir, 'index.html'));
 
-    applyTemplateToFile('build/templates/index.template', 'contributors.md', path.join(g_outBaseDir, 'contributors.html'), {
+    applyTemplateToFile(path.join(settings.templatePath, 'index.template'), 'contributors.md', path.join(g_outBaseDir, 'contributors.html'), {
       table_of_contents: '',
       templateOptions: '',
     });

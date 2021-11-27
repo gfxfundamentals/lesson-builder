@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<!-- this file is auto-generated from {{src_file_name}}. Do not edited directly -->
+<html lang="{{langInfo.langCode}}">
+<head>
+<meta charset="utf-8">
+
+<meta name="description" content="{{description}}">
+<meta name="thumbnail" content="{{screenshot}}">
+
+<meta property="og:title" content="{{title}}">
+<meta property="og:image" content="{{screenshot}}">
+<meta property="og:description" content="{{description}}">
+<meta property="og:url" content="{{url}}">
+
+<meta name="twitter:title" content="{{title}}">
+<meta name="twitter:url" content="{{url}}">
+<meta name="twitter:description" content="{{description}}">
+<meta name="twitter:image:src" content="{{screenshot}}">
+
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@graph":[
+    {
+      "@type":"WebSite",
+      "@id":"https://webgl2fundamentals.org/#website",
+      "url":"https://webgl2fundamentals.org/",
+      "name":"Webgl2Fundamentals"
+    },
+    {
+      "@type":"ImageObject",
+      "@id":"{{url}}#primaryimage",
+      "url":"{{screenshot}}",
+      "width":{{screenshotSize.width}},
+      "height":{{screenshotSize.height}}
+    },
+    {
+      "@type":"WebPage",
+      "@id":"{{url}}#webpage",
+      "url":"{{url}}",
+      "inLanguage":"{{langInfo.langCode}}",
+      "name":"{{title}}",
+      "keywords":"webgl webgl2 graphics programming",
+      "isPartOf":{
+        "@id":"https://webgl2fundamentals.org/#website"
+      },
+      "primaryImageOfPage":{
+        "@id":"{{url}}#primaryimage"
+      }
+    }
+  ]
+}
+</script>
+
+
+<title>{{title}}</title>
+{{#ifexists filename="/test/lessons/{{langCode}}/lang.css" langCode=langInfo.baseDirname}}
+<link rel="stylesheet" href="/test/lessons/{{langInfo.baseDirname}}/lang.css">
+{{/ifexists}}
+
+{{{include "test/templates/langs-meta.template"}}}
+
+</head>
+<body>
+<h1>{{title}}</h1>
+<div class="lesson-main">
+  {{{content}}}
+</div>
+    <div class="lesson-sidebar">
+        {{{include "test/templates/languages.template"}}}
+        <div id="toc">
+          {{{include "toc.html" filename="toc"}}}
+        </div>
+    </div>
+  </div>
+</div>
+</body>
+<script>
+const settings = {
+  contribTemplate: {{{stringify names="langInfo.contribTemplate,originalLangInfo.contribTemplate"}}},
+  owner: {{{stringify names="settings.owner"}}},
+  repo: {{{stringify names="settings.repo"}}},
+};
+</script>
+</html>
+
+
+

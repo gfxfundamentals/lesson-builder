@@ -1,0 +1,14 @@
+{
+  language: 'English',
+  langCode: 'en',   // if not specified will use folder
+  defaultExampleCaption: "click here to open in a separate window",
+  title: 'Lesson Builder',
+  description: 'Build Lessons',
+  link: 'https://github.com/gfxfundamentals/lesson-builder/',
+  missing: `Sorry this article has not been translated yet.`,
+  contribTemplate: 'Thank you <a href="${html_url}"><img src="${avatar_url}"> ${login}</a><br>for <a href="https://github.com/${owner}/${repo}/commits?author=${login}">${contributions} contributions</a>',
+  toc: 'Table of Contents',
+  categoryMapping: {
+    'lesson-builder': "Lesson Builder",
+  },
+}
