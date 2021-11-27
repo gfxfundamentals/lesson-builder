@@ -30,6 +30,9 @@
  */
 'use strict';
 
+const fs = require('fs');
+const path = require('path');
+
 var execute = function(cmd, args, callback) {
   var spawn = require('child_process').spawn;
 
@@ -60,6 +63,22 @@ var execute = function(cmd, args, callback) {
     }
   });
 }
-
 exports.execute = execute;
+
+// I'd use the glob module but too many vulnerabilities etc
+// and I don't need any specical functionality
+function glob(spec) {
+  const dirname = path.dirname(spec);
+  const basename = path.basename(spec)
+  const exp = basename.replace(/\./g, '\\.').replace(/\*/g, '.*?');
+  const re = new RegExp(exp);
+
+  const files = fs.readdirSync(dirname)
+     .filter(f => re.test(f))
+     .map(f => path.join(dirname, f));
+  
+  return files;
+}
+exports.glob = glob
+
 
