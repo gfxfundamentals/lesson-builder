@@ -15,25 +15,25 @@ I'm not sure it has any features over something like Jekyll except
 1. it's written in JavaScript.
 
    I'm not saying Ruby is bad. Only that
-I really only want to have to maintain one dev environment.
+   I really only want to have to maintain one dev environment.
 
    I particularly like that npm defaults to all dependencies being local.
-No knowledge needed. In special incantations. It just works.
-My, very limited experience with
-Ruby is that Ruby expects many things to be globally installed
-and you have to use other tools to help you make things local.
+   No knowledge needed. No special incantations. It just works.
+   My, very limited experience with
+   Ruby is that Ruby expects many things to be globally installed
+  and you have to use other tools to help you make things local.
 
 2. I think, but I'm probably wrong, that it handles HTML better.
 
    My markdown files have lots of embedded HTML. For whatever
-reason most of time I try this in other systems they get confused
-and end up seeing markdown inside portions of HTML. I probably
-just don't know how to use them correctly.
+   reason most of time I try this in other systems they get confused
+   and end up seeing markdown inside portions of HTML. I probably
+   just don't know how to use them correctly.
 
 3. It handles multiple languages
 
    I'm sure other systems do that too but it's not a common request
-so I'm guessing that's often less supported.
+   so I'm guessing that's often less supported.
 
 Anyway, I'm not trying to promote this as a solution to anything.
 It's just what I have hacked together over the years to make
@@ -440,3 +440,16 @@ issues.
   an lesson .md file, tries to fix some URLs, then writes
   that .md file back out. So, be sure your originals are
   checked into git.
+
+## Testing
+
+I started adding some tests to hopefully make it easy to um, test.
+Before this I had to use one of the other repos using this repo.
+
+One test generates files in the `out` folder and then diffs them
+to the `test/expected` folder. If it prints a difference and you
+want to update the expectations you can use
+
+```bash
+UPDATE_EXPECTED=true npm test
+```
