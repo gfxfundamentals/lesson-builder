@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id></id>
     <title>Lesson Builder</title>
-    <updated>2021-11-27T01:22:43.457Z</updated>
+    <updated>2021-12-26T08:00:00.000Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <author>
         <name>Lesson Builder Contributors</name>
@@ -16,11 +16,11 @@
         <id>https://lesson-builder-test.org/test/lessons/test-one.html</id>
         <link href="https://lesson-builder-test.org/test/lessons/test-one.html">
         </link>
-        <updated>2021-11-27T01:22:43.457Z</updated>
+        <updated>2021-12-26T08:00:00.000Z</updated>
         <author>
             <name>Lesson Builder Contributors</name>
             <uri>https://lesson-builder-test.org/contributors.html</uri>
         </author>
-        <published>2021-11-27T01:22:43.457Z</published>
+        <published>2021-12-26T08:00:00.000Z</published>
     </entry>
 </feed>

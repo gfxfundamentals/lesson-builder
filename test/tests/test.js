@@ -1,11 +1,82 @@
+const fs = require('fs');
+const path = require('path');
+const utils = require('../../utils');
 
 const notIt = _ => _;
+
+async function diff(a, b) {
+  return await utils.executeP('git', [
+     'diff',
+     '--no-index',
+     a,
+     b,
+   ]);
+}
 
 function assertEQ(actual, expected, msg = '') {
   if (actual !== expected) {
     throw new Error(`actual: ${actual} does not equal expected: ${expected}: ${msg}`);
   }
 }
+
+/*
+async function diffTree(a, b) {
+  const afiles = fs.readdirSync(a).sort();
+  const bfiles = fs.readdirSync(b).sort();
+
+  const addFiles = (files, id, both) => {
+    for (const file of files) {
+      both.set(file, (both.get(file) || '') + id);
+    }
+  };
+
+  const both = new Map();
+  addFiles(afiles, 'a', both);
+  addFiles(bfiles, 'b', both);
+
+  const diffs = [];
+  const files = [...both.keys()].sort();
+  for (const file of files) {
+    const id = both.get(file);
+    if (id === 'ab') {
+      const afile = path.join(a, file);
+      const bfile = path.join(b, file);
+      const astat = fs.statSync(afile);
+      const bstat = fs.statSync(bfile);
+      if (astat.isDirectory() === bstat.isDirectory()) {
+        if (astat.isDirectory()) {
+          const subDiffs = await diffTree(afile, bfile);
+          diffs.splice(diffs.length, 0, ...subDiffs);
+        } else {
+          const astr = fs.readFileSync(afile, {encoding: 'utf8'});
+          const bstr = fs.readFileSync(bfile, {encoding: 'utf8'});
+          const newDiffs = diff(afile, bfile);
+          if (newDiffs) {
+            diffs.splice(diffs.length, 0, newDiffs);
+          }
+        }
+      } else {
+        if (astat.isDirectory()) {
+          diffs.push(`${file} is in directory in ${a} but file ${b}`);
+        } else {
+          diffs.push(`${file} is in file in ${a} but directory ${b}`);
+        }
+      }
+    } else if (id === 'a') {
+      diffs.push(`${file} is in ${a} but not in ${b}`);
+    } else if (id === 'b') {
+      diffs.push(`${file} is in ${b} but not in ${a}`);
+    } else {
+      throw new Error('should never get here');
+    }
+  }
+  return diffs;
+}
+*/
+async function diffTree(a, b) {
+  return await diff(a, b);
+}
+
 
 describe('test lesson-builder', () => {
   it('globs', () => {
@@ -17,8 +88,9 @@ describe('test lesson-builder', () => {
 
   it('builds', async () => {
     const buildStuff = require('../../build');
+    const outDir = process.env.UPDATE_EXPECTED ? 'test/expected' : 'out';
     const buildSettings = {
-      outDir: 'test/expected',
+      outDir,
       baseUrl: 'https://lesson-builder-test.org',
       rootFolder: 'test',
       tocHanson: 'test/toc.hanson',
@@ -28,6 +100,7 @@ describe('test lesson-builder', () => {
       templatePath: 'test/templates',
       owner: 'gfxfundamentals',
       repo: 'lesson-builder',
+      feedDate: new Date(2021, 11, 26),
       thumbnailOptions: {
         thumbnailBackground: 'lesson-builder.png',
         text: [
@@ -44,5 +117,10 @@ describe('test lesson-builder', () => {
       },
     };
     await buildStuff(buildSettings);
+
+    const diffs = await diffTree('test/expected', outDir);
+    if (diffs.stderr.length !== 0 || diffs.stdout.length !== 0) {
+      throw new Error(`${diffs.stdout}\n${diffs.stderr}`);
+    }
   });
 });

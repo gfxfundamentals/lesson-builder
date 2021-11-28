@@ -32,6 +32,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const util = require('util');
 
 var execute = function(cmd, args, callback) {
   var spawn = require('child_process').spawn;
@@ -64,6 +65,9 @@ var execute = function(cmd, args, callback) {
   });
 }
 exports.execute = execute;
+
+exports.executeP = util.promisify(execute);
+
 
 // I'd use the glob module but too many vulnerabilities etc
 // and I don't need any specical functionality

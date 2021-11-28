@@ -27,7 +27,6 @@ const marked     = require('marked');
 const path       = require('path');
 const sitemap    = require('sitemap');
 const utils      = require('./utils');
-const util       = require('util');
 const moment     = require('moment');
 const url        = require('url');
 const colors     = require('ansi-colors');
@@ -62,8 +61,6 @@ function failError(...args) {
   ++numErrors;
   error(...args);
 }
-
-const executeP = util.promisify(utils.execute);
 
 marked.setOptions({
   rawHtml: true,
@@ -109,6 +106,10 @@ function writeFileIfChanged(fileName, content) {
     if (content === old) {
       return;
     }
+  }
+  const dirname = path.dirname(fileName);
+  if (!fs.existsSync(dirname)) {
+    fs.mkdirSync(dirname, {recursive: true});
   }
   fs.writeFileSync(fileName, content);
   console.log('Wrote: ' + fileName);  // eslint-disable-line
@@ -936,7 +937,7 @@ const Builder = function(outBaseDir, options) {
 
     for (const article of g_articles) {
       {
-        const result = await executeP('git', [
+        const result = await utils.executeP('git', [
             'log',
             '--format="%ci"',
             '--name-only',
@@ -946,7 +947,7 @@ const Builder = function(outBaseDir, options) {
         article.dateAdded = utcMomentFromGitLog(result, article.src_file_name, 'ctime');
       }
       {
-        const result = await executeP('git', [
+        const result = await utils.executeP('git', [
            'log',
            '--format="%ci"',
            '--name-only',
@@ -970,9 +971,9 @@ const Builder = function(outBaseDir, options) {
         description:    g_langInfo.description,
         link:           g_langInfo.link,
         image:          `${settings.baseUrl}/${settings.rootFolder}/lessons/resources/${settings.siteThumbnail}`,
-        date:           articles[0].dateModified.toDate(),
-        published:      articles[0].dateModified.toDate(),
-        updated:        articles[0].dateModified.toDate(),
+        date:           settings.feedDate || articles[0].dateModified.toDate(),
+        published:      settings.feedDate || articles[0].dateModified.toDate(),
+        updated:        settings.feedDate || articles[0].dateModified.toDate(),
         author: {
           name:       `${settings.siteName} Contributors`,
           link:       `${settings.baseUrl}/contributors.html`,
@@ -992,8 +993,8 @@ const Builder = function(outBaseDir, options) {
           ],
           // contributor: [
           // ],
-          date:           article.dateModified.toDate(),
-          published:      article.dateAdded.toDate(),
+          date:           settings.feedDate || article.dateModified.toDate(),
+          published:      settings.feedDate || article.dateAdded.toDate(),
           // image:          posts[key].image
         });
 
