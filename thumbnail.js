@@ -1,3 +1,4 @@
+'use strict';
 const fs = require('fs');
 const path = require('path');
 const CanvasKitInit = require(path.join(__dirname, 'node_modules', 'canvaskit-wasm', 'bin', 'canvaskit.js'));
