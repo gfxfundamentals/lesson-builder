@@ -42,7 +42,7 @@ const packageJSON = JSON.parse(fs.readFileSync('package.json', {encoding: 'utf8'
 
 colors.enabled = colorSupport.hasBasic;
 
-registerFont(path.join(__dirname, 'fonts', 'KlokanTechNotoSansCJK-Bold.otf'), { family: 'lesson-font' });
+//registerFont(path.join(__dirname, 'fonts', 'KlokanTechNotoSansCJK-Bold.otf'), { family: 'lesson-font' });
 
 const g_errors = [];
 function error(...args) {
