@@ -9,6 +9,9 @@ This entire file is one giant hack and really needs to be cleaned up!
 
 'use strict';
 
+const thumbnailGen = require('@gfxfundamentals/thumbnail-gen');
+const { default: ThumbnailGenerator } = require('./thumbnail');
+
 const requiredNodeVersion = 16;
 if (parseInt((/^v(\d+)\./).exec(process.version)[1]) < requiredNodeVersion) {
   throw Error(`requires at least node: ${requiredNodeVersion}`);
@@ -37,8 +40,6 @@ const g_cacheid = Date.now();
 const packageJSON = JSON.parse(fs.readFileSync('package.json', {encoding: 'utf8'}));
 
 colors.enabled = colorSupport.hasBasic;
-
-//registerFont(path.join(__dirname, 'fonts', 'KlokanTechNotoSansCJK-Bold.otf'), { family: 'lesson-font' });
 
 const g_errors = [];
 function error(...args) {
@@ -768,22 +769,26 @@ const Builder = function(outBaseDir, options) {
       const outFileName = path.join(outBaseDir, baseName + '.html');
 
       if (false) {
-        const data = loadMD(fileName);
-        g_siteThumbnailImage = g_siteThumbnailImage || await loadImage(g_siteThumbnailFilename); // eslint-disable-line
-        const canvas = createCanvas(g_siteThumbnailImage.width, g_siteThumbnailImage.height);
         settings.thumbnailOptions.text[0].text = data.headers.toc || data.headers.title;
-        genThumbnail({
-          backgroundImage: g_siteThumbnailImage,
-          canvas,
-          ...settings.thumbnailOptions,
-        });
+        const data = loadMD(fileName);
+        //g_siteThumbnailImage = g_siteThumbnailImage || await loadImage(g_siteThumbnailFilename); // eslint-disable-line
+        //const canvas = createCanvas(g_siteThumbnailImage.width, g_siteThumbnailImage.height);
+        //settings.thumbnailOptions.text[0].text = data.headers.toc || data.headers.title;
+        await ThumbnailGenerator(settings.thumbnailOptions, g_siteThumbnailFilename)
+        //genThumbnail({
+        //  backgroundImage: g_siteThumbnailImage,
+        //  canvas,
+        //  ...settings.thumbnailOptions,
+        //});
+    
+        extra['screenshot'] = `${settings.baseUrl}/${settings.rootFolder}/lessons/screenshots/${path.basename(filename)}`;
+        extra['screenshotSize'] = { width: g_siteThumbnailImage.width, height: g_siteThumbnailImage.height };
+
         const basename = path.basename(baseName);
         const filename = path.join(settings.outDir, settings.rootFolder, 'lessons', 'screenshots', `${basename}_${g_langInfo.langCode}.jpg`);
         const buf = canvas.toBuffer('image/jpeg', { quality: 0.8 });
         console.log('---->', filename);
         fs.writeFileSync(filename, buf);
-        extra['screenshot'] = `${settings.baseUrl}/${settings.rootFolder}/lessons/screenshots/${path.basename(filename)}`;
-        extra['screenshotSize'] = { width: g_siteThumbnailImage.width, height: g_siteThumbnailImage.height };
       }
 
       await applyTemplateToFile(templatePath, fileName, outFileName, extra);
