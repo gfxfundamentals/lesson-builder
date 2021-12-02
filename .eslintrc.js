@@ -57,7 +57,7 @@ module.exports = {
     "semi-spacing": [2, {"before": false, "after": true}],
     "space-infix-ops": 2,
     "space-unary-ops": [2, { "words": true, "nonwords": false }],
-    "strict": [2, "global"],
+    //"strict": [2, "global"],
     "yoda": [2, "never"],
 
     "brace-style": [2, "1tbs", { "allowSingleLine": false }],

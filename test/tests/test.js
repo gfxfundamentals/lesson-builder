@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const ThumbnailGenerator = require('../../thumbnail');
 const utils = require('../../utils');
 
 const notIt = _ => _;
@@ -86,7 +87,7 @@ describe('test lesson-builder', () => {
     assertEQ(files[0], 'test/lessons/test-one.md');
   });
 
-  it('builds', async () => {
+  it('builds', async() => {
     const buildStuff = require('../../build');
     const outDir = process.env.UPDATE_EXPECTED ? 'test/expected' : 'out';
     const buildSettings = {
@@ -122,5 +123,44 @@ describe('test lesson-builder', () => {
     if (diffs.stderr.length !== 0 || diffs.stdout.length !== 0) {
       throw new Error(`${diffs.stdout}\n${diffs.stderr}`);
     }
+  });
+
+  it('generates thumbnail', async function() {
+    this.timeout(25000);
+
+    let dataURL;
+    let thumbGen;
+    try {
+      thumbGen = new ThumbnailGenerator();
+      const settings = {
+        thumbnailBackground: 'test/lessons/resources/lesson-builder.png',
+        text: [
+          {
+            font: 'bold 100px lesson-font',
+            verticalSpacing: 100,
+            offset: [100, 120],
+            textAlign: 'left',
+            shadowOffset: [15, 15],
+            strokeWidth: 15,
+            textWrapWidth: 1000,
+          },
+          {
+            font: 'bold 60px lesson-font',
+            text: 'lesson-builder',
+            verticalSpacing: 100,
+            offset: [-100, -90],
+            textAlign: 'right',
+            shadowOffset: [8, 8],
+            strokeWidth: 15,
+            textWrapWidth: 1000,
+            color: 'hsl(340, 100%, 70%)',
+          },
+        ],
+      };
+      dataURL = await thumbGen.generate(settings);
+    } finally {
+      thumbGen.close();
+    }
+    assertEQ(dataURL, 'this is the result from thumbnailhtml');
   });
 });

@@ -1,0 +1,38 @@
+<style>
+@font-face {
+  font-family: "lesson-font";
+  src: url("fonts/KlokanTechNotoSansCJK-Bold.otf");
+}
+
+canvas {
+  display: block;
+  padding: 1em;
+  max-width: calc(100vw - 10px - 2em);
+}
+</style>
+<script src="node_modules/@gfxfundamentals/thumbnail-gen/thumbnail-gen.js"></script>
+<script>
+async function loadImage(src) {
+  const img = new Image();
+  img.src = src;
+  await img.decode();
+  return img;
+}
+
+async function generate(settings) {
+  return "this is the result from thumbnailhtml";
+  /*
+  const logo = await loadImage(settings.backgroundFilename);
+  const canvas = document.createElement('canvas');
+  document.body.appendChild(canvas);
+  canvas.width = logo.width;
+  canvas.height = logo.height;
+  genThumbnail({
+    backgroundImage: logo,
+    canvas,
+    ...settings,
+  });
+  return canvas.toDataURL();
+  */
+}
+</script>
