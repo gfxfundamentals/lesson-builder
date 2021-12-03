@@ -7,13 +7,26 @@
         {
             "type": "pwa-node",
             "request": "launch",
-            "name": "Launch Program",
+            "name": "Debug Build",
             "skipFiles": [
                 "<node_internals>/**"
             ],
             "program": "${workspaceFolder}/node_modules/mocha/bin/mocha",
             "args": [
                 "test/tests"
+            ]
+        },
+        {
+            "type": "pwa-node",
+            "request": "launch",
+            "name": "Debug Thumbnails",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "program": "${workspaceFolder}/node_modules/mocha/bin/mocha",
+            "args": [
+                "test/tests",
+                "--grep=thumbnail"
             ]
         }
     ]
