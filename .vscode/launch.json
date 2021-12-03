@@ -28,6 +28,15 @@
                 "test/tests",
                 "--grep=thumbnail"
             ]
+        },
+        {
+            "type": "pwa-node",
+            "request": "launch",
+            "name": "Debug Test Thumbnails",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "program": "${workspaceFolder}/test-w-class.js",
         }
     ]
 }

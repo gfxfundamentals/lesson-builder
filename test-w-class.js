@@ -5,11 +5,11 @@ const Foo = require('./thumbnail');
 async function main() {
   const foo = new Foo();
   const settings = {
-    backgroundFilename: `file://${path.join(__dirname, 'test', 'lessons', 'resources', 'lesson-builder.png')}`,
-    //backgroundFilename: `file://${path.join(__dirname, 'foo.png')}`,
+    backgroundFilename: path.join(__dirname, 'test', 'lessons', 'resources', 'lesson-builder.png'),
     text: [
       {
         font: 'bold 100px lesson-font',
+        text: 'place-holder',
         verticalSpacing: 100,
         offset: [100, 120],
         textAlign: 'left',
@@ -31,7 +31,7 @@ async function main() {
     ],
   };
   const result = await foo.generate(settings);
-  console.log("result:", result);
+  console.log('result:', result);
   await foo.close();
 }
 main();
