@@ -2,6 +2,7 @@
 //const fs = require('fs');
 const path = require('path');
 const ThumbnailGenerator = require('../../thumbnail');
+//const ThumbnailGenerator = require('../../foo');
 const utils = require('../../utils');
 
 //const notIt = _ => _;
@@ -146,18 +147,11 @@ describe('test lesson-builder', () => {
     try {
       thumbGen = new ThumbnailGenerator();
       const settings = {
-<<<<<<< HEAD
         backgroundFilename: path.join(__dirname, '..', 'lessons', 'resources', 'lesson-builder.png'),
         text: [
           {
             font: 'bold 100px lesson-font',
             text: 'placeholder',
-=======
-        thumbnailBackground: 'test/lessons/resources/lesson-builder.png',
-        text: [
-          {
-            font: 'bold 100px lesson-font',
->>>>>>> dbd6a38 (removing canvas wip)
             verticalSpacing: 100,
             offset: [100, 120],
             textAlign: 'left',
@@ -182,7 +176,6 @@ describe('test lesson-builder', () => {
     } finally {
       thumbGen.close();
     }
-<<<<<<< HEAD
     assertEQ(typeof dataURL, 'string');
     assert(dataURL.startsWith('data:image/png;base64,'), 'dataURL starts with "data:image/png;base64"');
   });
@@ -218,8 +211,5 @@ describe('test lesson-builder', () => {
     const result = await thumbGen.generate(settings);
     console.log('result:', result);
     await thumbGen.close();
-=======
-    assertEQ(dataURL, 'this is the result from thumbnailhtml');
->>>>>>> dbd6a38 (removing canvas wip)
   });
 });
