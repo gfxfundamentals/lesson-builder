@@ -1,15 +1,15 @@
 module.exports = {
   "env": {
     "browser": true,
-    "es6": true
+    "es6": true,
   },
   "parserOptions": {
-    "ecmaVersion": 2019
+    "ecmaVersion": 2019,
   },
   "plugins": [
     "eslint-plugin-optional-comma-spacing",
     "eslint-plugin-one-variable-per-var",
-    "eslint-plugin-require-trailing-comma"
+    "eslint-plugin-require-trailing-comma",
   ],
   "extends": "eslint:recommended",
   "rules": {
@@ -18,7 +18,6 @@ module.exports = {
     "no-caller": 2,
     "no-catch-shadow": 2,
     "no-const-assign": 2,
-    "no-labels": 2,
     "no-eval": 2,
     "no-extend-native": 2,
     "no-extra-bind": 2,
@@ -83,5 +82,13 @@ module.exports = {
     "semi": [2, "always"],
     "space-before-function-paren": [2, "never"],
     "keyword-spacing": [1, {"before": true, "after": true, "overrides": {}} ]
-  }
+  },
+  "overrides": [
+    {
+      "files": [".eslintrc.js"],
+      "rules": {
+        "quotes": [0, "single"],
+      },
+    },
+  ],
 };
