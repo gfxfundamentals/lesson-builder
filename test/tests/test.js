@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const ThumbnailGenerator = require('../../thumbnail');
+//const ThumbnailGenerator = require('../../foo');
 const utils = require('../../utils');
 
 const notIt = _ => _;
@@ -17,6 +18,12 @@ async function diff(a, b) {
 function assertEQ(actual, expected, msg = '') {
   if (actual !== expected) {
     throw new Error(`actual: ${actual} does not equal expected: ${expected}: ${msg}`);
+  }
+}
+
+function assert(v, msg = '') {
+  if (!v) {
+    throw new Error(`expected: ${msg}`);
   }
 }
 
@@ -133,10 +140,11 @@ describe('test lesson-builder', () => {
     try {
       thumbGen = new ThumbnailGenerator();
       const settings = {
-        thumbnailBackground: 'test/lessons/resources/lesson-builder.png',
+        backgroundFilename: path.join(__dirname, '..', 'lessons', 'resources', 'lesson-builder.png'),
         text: [
           {
             font: 'bold 100px lesson-font',
+            text: 'placeholder',
             verticalSpacing: 100,
             offset: [100, 120],
             textAlign: 'left',
@@ -161,6 +169,40 @@ describe('test lesson-builder', () => {
     } finally {
       thumbGen.close();
     }
-    assertEQ(dataURL, 'this is the result from thumbnailhtml');
+    assertEQ(typeof dataURL, 'string');
+    assert(dataURL.startsWith('data:image/png;base64,'), 'dataURL starts with "data:image/png;base64"');
+  });
+
+  it('foo', async function() {
+    this.timeout(25000);
+    const thumbGen = new ThumbnailGenerator();
+    const settings = {
+      backgroundFilename: `file://${path.join(__dirname, '..', 'lessons', 'resources', 'lesson-builder.png')}`,
+      text: [
+        {
+          font: 'bold 100px lesson-font',
+          verticalSpacing: 100,
+          offset: [100, 120],
+          textAlign: 'left',
+          shadowOffset: [15, 15],
+          strokeWidth: 15,
+          textWrapWidth: 1000,
+        },
+        {
+          font: 'bold 60px lesson-font',
+          text: 'lesson-builder',
+          verticalSpacing: 100,
+          offset: [-100, -90],
+          textAlign: 'right',
+          shadowOffset: [8, 8],
+          strokeWidth: 15,
+          textWrapWidth: 1000,
+          color: 'hsl(340, 100%, 70%)',
+        },
+      ],
+    };
+    const result = await thumbGen.generate(settings);
+    console.log("result:", result);
+    await thumbGen.close();
   });
 });
