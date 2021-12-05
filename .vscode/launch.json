@@ -36,7 +36,7 @@
             "skipFiles": [
                 "<node_internals>/**"
             ],
-            "program": "${workspaceFolder}/test-w-class.js",
+            "program": "${workspaceFolder}/test.js",
         }
     ]
 }

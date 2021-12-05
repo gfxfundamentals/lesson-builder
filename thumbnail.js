@@ -160,7 +160,7 @@ class ThumbnailGenerator {
     this.ctx = this.canvas.getContext('2d');
 
     const lessonFontBuffer = readFileAsBuffer(path.join(__dirname, 'fonts', 'KlokanTechNotoSansCJK-Bold.otf'))
-    this.fontMgr = this.CanvasKit.FontMgr.FromData([lessonFontBuffer]); 
+    this.fontMgr = this.CanvasKit.FontMgr.FromData([lessonFontBuffer]);
   }
   async generate(settings) {
     await this.launch();
