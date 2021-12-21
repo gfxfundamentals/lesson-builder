@@ -35,12 +35,13 @@ const colors     = require('ansi-colors');
 const colorSupport = require('color-support');
 const sizeOfImage = require('image-size');
 const genThumbnail = require('@gfxfundamentals/thumbnail-gen');
+const { createCanvas, loadImage, registerFont } = require('canvas');
 const g_cacheid = Date.now();
 const packageJSON = JSON.parse(fs.readFileSync('package.json', {encoding: 'utf8'}));
 
 colors.enabled = colorSupport.hasBasic;
 
-//registerFont(path.join(__dirname, 'fonts', 'KlokanTechNotoSansCJK-Bold.otf'), { family: 'lesson-font' });
+registerFont(path.join(__dirname, 'fonts', 'KlokanTechNotoSansCJK-Bold.otf'), { family: 'lesson-font' });
 
 const g_errors = [];
 function error(...args) {
@@ -766,7 +767,7 @@ const Builder = function(outBaseDir, options) {
       const baseName = fileName.substr(0, fileName.length - ext.length);
       const outFileName = path.join(outBaseDir, baseName + '.html');
 
-      if (false) {
+      {
         const data = loadMD(fileName);
         g_siteThumbnailImage = g_siteThumbnailImage || await loadImage(g_siteThumbnailFilename); // eslint-disable-line
         const canvas = createCanvas(g_siteThumbnailImage.width, g_siteThumbnailImage.height);
