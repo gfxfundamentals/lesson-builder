@@ -1,18 +1,25 @@
-const fs = require('fs');
+'use strict';
+//const fs = require('fs');
 const path = require('path');
 const ThumbnailGenerator = require('../../thumbnail');
-//const ThumbnailGenerator = require('../../foo');
+
 const utils = require('../../utils');
 
-const notIt = _ => _;
+//const notIt = _ => _;
 
 async function diff(a, b) {
-  return await utils.executeP('git', [
-     'diff',
-     '--no-index',
-     a,
-     b,
-   ]);
+  let result;
+  try {
+    result = await utils.executeP('git', [
+       'diff',
+       '--no-index',
+       a,
+       b,
+     ]);
+  } catch (e) {
+    result = e;
+  }
+  return result;
 }
 
 function assertEQ(actual, expected, msg = '') {
@@ -127,7 +134,7 @@ describe('test lesson-builder', () => {
     await buildStuff(buildSettings);
 
     const diffs = await diffTree('test/expected', outDir);
-    if (diffs.stderr.length !== 0 || diffs.stdout.length !== 0) {
+    if (diffs.exitCode !== 0 || diffs.stderr.length !== 0 || diffs.stdout.length !== 0) {
       throw new Error(`${diffs.stdout}\n${diffs.stderr}`);
     }
   });
@@ -202,7 +209,7 @@ describe('test lesson-builder', () => {
       ],
     };
     const result = await thumbGen.generate(settings);
-    console.log("result:", result);
+    console.log('result:', result);
     await thumbGen.close();
   });
 });
