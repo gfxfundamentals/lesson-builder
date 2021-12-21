@@ -797,8 +797,7 @@ const Builder = function(outBaseDir, options) {
         const basename = path.basename(baseName);
         const filename = path.join(settings.outDir, settings.rootFolder, 'lessons', 'screenshots', `${basename}_${g_langInfo.langCode}.jpg`);
         const buf = canvas.toBuffer('image/jpeg', { quality: 0.8 });
-        console.log('---->', filename);
-        fs.writeFileSync(filename, buf);
+        writeFileIfChanged(filename, buf);
       }
 
       await applyTemplateToFile(templatePath, fileName, outFileName, extra);
