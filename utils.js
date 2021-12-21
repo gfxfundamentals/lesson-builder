@@ -34,55 +34,54 @@ const fs = require('fs');
 const path = require('path');
 const util = require('util');
 
-var execute = function(cmd, args, callback) {
-  var spawn = require('child_process').spawn;
+function execute(cmd, args, callback) {
+  const spawn = require('child_process').spawn;
 
-  var proc = spawn(cmd, args);
-  var stdout = [];
-  var stderr = [];
+  const proc = spawn(cmd, args);
+  let stdout = [];
+  let stderr = [];
 
   proc.stdout.setEncoding('utf8');
   proc.stdout.on('data', function(data) {
-      var str = data.toString()
-      var lines = str.split(/(\r?\n)/g);
+      const str = data.toString();
+      const lines = str.split(/(\r?\n)/g);
       stdout = stdout.concat(lines);
   });
 
   proc.stderr.setEncoding('utf8');
   proc.stderr.on('data', function(data) {
-      var str = data.toString()
-      var lines = str.split(/(\r?\n)/g);
+      const str = data.toString();
+      const lines = str.split(/(\r?\n)/g);
       stderr = stderr.concat(lines);
   });
 
   proc.on('close', function(code) {
-    var result = {stdout: stdout.join('\n'), stderr: stderr.join('\n')};
-    if (parseInt(code) != 0) {
-      callback('exit code ' + code, result)
+    const result = {exitCode: code, stdout: stdout.join('\n'), stderr: stderr.join('\n')};
+    if (parseInt(code) !== 0) {
+      callback(result);
     } else {
-      callback(null, result)
+      callback(null, result);
     }
   });
 }
-exports.execute = execute;
 
+exports.execute = execute;
 exports.executeP = util.promisify(execute);
 
-
 // I'd use the glob module but too many vulnerabilities etc
-// and I don't need any specical functionality
+// and I don't need any special functionality.
 function glob(spec) {
   const dirname = path.dirname(spec);
-  const basename = path.basename(spec)
+  const basename = path.basename(spec);
   const exp = basename.replace(/\./g, '\\.').replace(/\*/g, '.*?');
   const re = new RegExp(exp);
 
   const files = fs.readdirSync(dirname)
      .filter(f => re.test(f))
      .map(f => path.join(dirname, f));
-  
+
   return files;
 }
-exports.glob = glob
+exports.glob = glob;
 
 
