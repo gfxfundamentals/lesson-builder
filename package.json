@@ -16,7 +16,6 @@
     "marked": "git://github.com/greggman/marked.git#raw-html",
     "moment": "^2.29.1",
     "node-fetch": "^3.0.0",
-    "puppeteer": "^11.0.0",
     "sitemap": "git://github.com/greggman/sitemap.js.git#multiple-langs"
   },
   "devDependencies": {
