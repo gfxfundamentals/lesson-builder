@@ -290,11 +290,18 @@ Handlebars.registerHelper('stringify', function(options) {
   return JSON.stringify(data, null, 2);
 });
 
-Handlebars.registerHelper('escapeHTML', function(options) {
-  return options.hash.content
-     .replace(/&/g, '&amp;')
-     .replace(/</g, '&lt;')
-     .replace(/>/g, '&gt;');
+/*
+This won't work because handlebars is going to try to parse
+the content. For example
+
+{{{escapeHTML content="<div class="foo"></div>"}}}
+
+Won't work because of the nested quotes and having to manually
+escape the quotes defeats the purpose.
+*/
+
+Handlebars.registerHelper('escapehtml', function(options) {
+  return Handlebars.escapeExpression(options.fn(this));
 });
 
 Handlebars.registerHelper('diagram', function(options) {
