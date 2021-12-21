@@ -1,16 +1,24 @@
-const fs = require('fs');
-const path = require('path');
+'use strict';
+
+//const fs = require('fs');
+//const path = require('path');
 const utils = require('../../utils');
 
-const notIt = _ => _;
+//const notIt = _ => _;
 
 async function diff(a, b) {
-  return await utils.executeP('git', [
-     'diff',
-     '--no-index',
-     a,
-     b,
-   ]);
+  let result;
+  try {
+    result = await utils.executeP('git', [
+       'diff',
+       '--no-index',
+       a,
+       b,
+     ]);
+  } catch (e) {
+    result = e;
+  }
+  return result;
 }
 
 function assertEQ(actual, expected, msg = '') {
@@ -86,7 +94,7 @@ describe('test lesson-builder', () => {
     assertEQ(files[0], 'test/lessons/test-one.md');
   });
 
-  it('builds', async () => {
+  it('builds', async() => {
     const buildStuff = require('../../build');
     const outDir = process.env.UPDATE_EXPECTED ? 'test/expected' : 'out';
     const buildSettings = {
@@ -119,7 +127,7 @@ describe('test lesson-builder', () => {
     await buildStuff(buildSettings);
 
     const diffs = await diffTree('test/expected', outDir);
-    if (diffs.stderr.length !== 0 || diffs.stdout.length !== 0) {
+    if (diffs.exitCode !== 0 || diffs.stderr.length !== 0 || diffs.stdout.length !== 0) {
       throw new Error(`${diffs.stdout}\n${diffs.stderr}`);
     }
   });

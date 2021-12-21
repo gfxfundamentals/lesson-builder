@@ -289,6 +289,13 @@ Handlebars.registerHelper('stringify', function(options) {
   return JSON.stringify(data, null, 2);
 });
 
+Handlebars.registerHelper('escapeHTML', function(options) {
+  return options.hash.content
+     .replace(/&/g, '&amp;')
+     .replace(/</g, '&lt;')
+     .replace(/>/g, '&gt;');
+});
+
 Handlebars.registerHelper('diagram', function(options) {
 
   options.hash.width  = options.hash.width || '400';
