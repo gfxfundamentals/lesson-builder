@@ -425,6 +425,33 @@ Available to the templates are the following variables.
 
 * `warning`: Inserts the warning template with a translated message.
 
+* `escapehtml`
+
+  Inside markdown you can insert code using triple backticks
+  but sometimes you're embedding code in HTML in which case markdown is not processed.
+
+  To handle that you can use `<escapeHTML>`. Example:
+
+  ```html
+  <pre class="prettyprint"><code>{{#escapeHTML}}
+    <div>
+      <div>foo</div>
+    </div>
+  {{/escapeHTML}}</code></pre>
+  ```
+
+  which will produce
+
+  ```html
+  <pre class="prettyprint"><code>
+    &lt;div&gt;
+      &lt;div&gt;foo&lt;/div&gt;
+    &lt;/div&gt;
+  </code></pre>
+  ```
+
+  NOTE: double brackets are required, triple brackets will fail!
+
 ## Debugging 
 
 You can set the following environment variables to help find

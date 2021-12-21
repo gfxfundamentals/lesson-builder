@@ -9,7 +9,7 @@ This is a test
 ```
 
 <pre class="prettyprint other"><code>
-{{{escapeHTML content="<div>
+{{#escapehtml}}<div>
   <div>test</div>
-</div>"}}}
+</div>{{/escapehtml}}
 </code></pre>
