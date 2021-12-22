@@ -1,5 +1,4 @@
 'use strict';
-
 module.exports = {
   'env': {
     'browser': true,
@@ -11,7 +10,7 @@ module.exports = {
   'plugins': [
     'eslint-plugin-optional-comma-spacing',
     'eslint-plugin-one-variable-per-var',
-    'eslint-plugin-require-trailing-comma'
+    'eslint-plugin-require-trailing-comma',
   ],
   'extends': 'eslint:recommended',
   'rules': {

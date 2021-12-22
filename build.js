@@ -32,14 +32,12 @@ const url        = require('url');
 const colors     = require('ansi-colors');
 const colorSupport = require('color-support');
 const sizeOfImage = require('image-size');
-const genThumbnail = require('@gfxfundamentals/thumbnail-gen');
-const { createCanvas, loadImage, registerFont } = require('canvas');
+const ThumbnailGenerator = require('./thumbnail');
+
 const g_cacheid = Date.now();
 const packageJSON = JSON.parse(fs.readFileSync('package.json', {encoding: 'utf8'}));
 
 colors.enabled = colorSupport.hasBasic;
-
-registerFont(path.join(__dirname, 'fonts', 'KlokanTechNotoSansCJK-Bold.otf'), { family: 'lesson-font' });
 
 const g_errors = [];
 function error(...args) {
@@ -458,6 +456,7 @@ const Builder = function(outBaseDir, options) {
   let g_articles = [];
   let g_langInfo;
   let g_originalLangInfo;
+  let g_thumbailGen;
   const g_langDB = {};
   const g_outBaseDir = outBaseDir;
   const g_origPath = options.origPath;
@@ -784,20 +783,20 @@ const Builder = function(outBaseDir, options) {
 
       {
         const data = loadMD(fileName);
-        g_siteThumbnailImage = g_siteThumbnailImage || await loadImage(g_siteThumbnailFilename); // eslint-disable-line
-        const canvas = createCanvas(g_siteThumbnailImage.width, g_siteThumbnailImage.height);
         settings.thumbnailOptions.text[0].text = data.headers.toc || data.headers.title;
-        genThumbnail({
-          backgroundImage: g_siteThumbnailImage,
-          canvas,
+        const thumb = await g_thumbailGen.generate({
+          backgroundFilename: g_siteThumbnailFilename,
           ...settings.thumbnailOptions,
         });
+
         const basename = path.basename(baseName);
         const filename = path.join(settings.outDir, settings.rootFolder, 'lessons', 'screenshots', `${basename}_${g_langInfo.langCode}.jpg`);
-        const buf = canvas.toBuffer('image/jpeg', { quality: 0.8 });
-        writeFileIfChanged(filename, buf);
+
+        const size = sizeOfImage(thumb);
         extra['screenshot'] = `${settings.baseUrl}/${settings.rootFolder}/lessons/screenshots/${path.basename(filename)}`;
-        extra['screenshotSize'] = { width: g_siteThumbnailImage.width, height: g_siteThumbnailImage.height };
+        extra['screenshotSize'] = { width: size.width, height: size.height };
+
+        writeFileIfChanged(filename, thumb);
       }
 
       await applyTemplateToFile(templatePath, fileName, outFileName, extra);
@@ -838,9 +837,14 @@ const Builder = function(outBaseDir, options) {
     };
   };
 
-  this.preProcess = function(langs) {
+  this.preProcess = async function(langs) {
+    g_thumbailGen = new ThumbnailGenerator();
     langs.forEach(getLanguageSelection);
     g_originalLangInfo = g_langDB['en'].langInfo;
+  };
+
+  this.close = async function() {
+    await g_thumbailGen.close();
   };
 
   this.process = async function(options) {
@@ -1139,7 +1143,7 @@ async function main() {
     origPath: `${settings.rootFolder}/lessons`,  // english articles
   });
 
-  b.preProcess(g_langs);
+  await b.preProcess(g_langs);
 
   if (hackyProcessSelectFiles) {
     const langsInFilenames = new Set();
@@ -1166,6 +1170,7 @@ async function main() {
     }
   } finally {
     cache.clear();
+    await b.close();
   }
 }
 

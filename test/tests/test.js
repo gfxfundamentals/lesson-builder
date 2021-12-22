@@ -1,7 +1,7 @@
 'use strict';
-
 //const fs = require('fs');
-//const path = require('path');
+const path = require('path');
+const ThumbnailGenerator = require('../../thumbnail');
 const utils = require('../../utils');
 
 //const notIt = _ => _;
@@ -24,6 +24,12 @@ async function diff(a, b) {
 function assertEQ(actual, expected, msg = '') {
   if (actual !== expected) {
     throw new Error(`actual: ${actual} does not equal expected: ${expected}: ${msg}`);
+  }
+}
+
+function assert(v, msg = '') {
+  if (!v) {
+    throw new Error(`expected: ${msg}`);
   }
 }
 
@@ -110,7 +116,10 @@ describe('test lesson-builder', () => {
       repo: 'lesson-builder',
       feedDate: new Date(2021, 11, 26),
       thumbnailOptions: {
-        thumbnailBackground: 'lesson-builder.png',
+        backgroundFilename: path.join(__dirname, '..', 'lessons', 'resources', 'lesson-builder.png'),
+        fonts: [
+          { name: 'lesson-font', filename: path.join(__dirname, '..', '..', 'fonts', 'KlokanTechNotoSansCJK-Bold.otf'), },
+        ],
         text: [
           {
             font: '100px lesson-font',
@@ -131,4 +140,48 @@ describe('test lesson-builder', () => {
       throw new Error(`${diffs.stdout}\n${diffs.stderr}`);
     }
   });
+
+  it('generates thumbnail', async function() {
+    this.timeout(25000);
+
+    let data;
+    let thumbGen;
+    try {
+      thumbGen = new ThumbnailGenerator();
+      const settings = {
+        backgroundFilename: path.join(__dirname, '..', 'lessons', 'resources', 'lesson-builder.png'),
+        fonts: [
+          { name: 'lesson-font', filename: path.join(__dirname, '..', '..', 'fonts', 'KlokanTechNotoSansCJK-Bold.otf'), },
+        ],
+        text: [
+          {
+            font: 'bold 100px lesson-font',
+            text: 'placeholder',
+            verticalSpacing: 100,
+            offset: [100, 120],
+            textAlign: 'left',
+            shadowOffset: [15, 15],
+            strokeWidth: 15,
+            textWrapWidth: 1000,
+          },
+          {
+            font: 'bold 60px lesson-font',
+            text: 'lesson-builder',
+            verticalSpacing: 100,
+            offset: [-100, -90],
+            textAlign: 'right',
+            shadowOffset: [8, 8],
+            strokeWidth: 15,
+            textWrapWidth: 1000,
+            color: 'hsl(340, 100%, 70%)',
+          },
+        ],
+      };
+      data = await thumbGen.generate(settings);
+    } finally {
+      thumbGen.close();
+    }
+    assert(data instanceof Buffer);
+  });
+
 });
