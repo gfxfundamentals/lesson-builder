@@ -4,6 +4,7 @@ const path = require('path');
 const Server = require('./server');
 const puppeteer = require('puppeteer');
 const mime = require('mime-types');
+const { createExposedPromise } = require('./utils');
 
 const logger = {
   log: console.log.bind(console),
@@ -48,6 +49,9 @@ class ServerWrapper {
     await this.init();
     this.server.deleteFile(pathname);
   }
+  async deleteFiles() {
+    // TDB
+  }
   async close() {
     if (this.initPromise) {
       delete this.initPromise;
@@ -72,10 +76,11 @@ class ThumbnailGenerator {
   constructor() {
     this.id = 0;
   }
-  async launch() {
-    if (this.browser) {
-      return;
+  async launch(settings) {
+    if (this.initPromise) {
+      return this.initPromise.promise;
     }
+    this.initPromise = createExposedPromise();
     this.browser = await puppeteer.launch({dumpio: !!process.env.DEBUG});
     this.page = await this.browser.newPage();
 
@@ -87,18 +92,14 @@ class ThumbnailGenerator {
 
     this.server = new ServerWrapper();
     await this.server.init();
-  }
-  async generate(settings) {
-    await this.launch();
-    const {server, page} = this;
 
+    const {server, page} = this;
     const promises = [
       server.getBaseUrl(),
     ];
-
-    const id = (this.id++).toString().padStart(5, '0');
     const js = readFileAsBuffer(require.resolve('@gfxfundamentals/thumbnail-gen'));
     promises.push(server.addFile('thumbnail-gen.js', 'application/javascript', js));
+
     const userFonts = settings.fonts || [];
     const fonts = [
       // default font
@@ -120,6 +121,8 @@ class ThumbnailGenerator {
       <div style="font-family: ${name};">test</div>
       `;
     });
+
+    const id = '00000';
     const img = readFileAsBuffer(settings.backgroundFilename);
     const ext = path.extname(settings.backgroundFilename);
     const imgFilename = `img-${id}${ext}`;
@@ -133,9 +136,17 @@ ${fontsHTML.join('\n')}
 <script>
 'use strict';
 
+const imgs = new Map();
 async function loadImage(src) {
   return new Promise((resolve, reject) => {
-    const img = new Image();
+    let img = imgs.get(src);
+    if (img) {
+      resolve(img);
+      return;
+    }
+
+    img = new Image();
+    imgs.set(src, img);
     img.onload = () => resolve(img);
     img.onerror = reject;
     img.src = src;
@@ -156,28 +167,24 @@ function createExposedPromise() {
   };
 }
 
-window.ready = createExposedPromise();
+const canvas = document.createElement('canvas');
+document.body.appendChild(canvas);
 
-async function main() {
+async function main(settings) {
   try {
     await document.fonts.ready;
-    const logo = await loadImage('${imgFilename}');
-    const canvas = document.createElement('canvas');
-    document.body.appendChild(canvas);
+    const logo = await loadImage(settings.imgFilename);
     canvas.width = logo.width;
     canvas.height = logo.height;
-    const settings = ${JSON.stringify(settings)};
     settings.backgroundImage = logo;
     settings.canvas = canvas;
     genThumbnail(settings);
-    window.ready.resolve(canvas);
+    return canvas;
  } catch(e) {
    console.error(e);
    throw e;
   }
 }
-
-main();
 
 </script>
     `;
@@ -191,21 +198,28 @@ main();
       waitUntil: 'networkidle2',
     });
 
-    const data = await page.evaluate(async() => {
-      const canvas = await window.ready.promise;
+// these should be put in a cache
+this.imgHref = `${baseUrl}/${imgFilename}`;
+    this.initPromise.resolve();
+    return this.initPromise.promise;
+  }
+  async generate(_settings) {
+    await this.launch(_settings);
+    const settings = {
+      ..._settings,
+      imgFilename: this.imgHref,
+    }
+    const {page} = this;
+
+    const data = await page.evaluate(async(settings) => {
+      const canvas = await main(settings);
       return {
         dataURL: canvas.toDataURL('image/jpeg', 0.9),
       };
-    });
+    }, settings);
 
     const header = 'data:image/jpeg;base64,';
     const bytes = Buffer.from(data.dataURL.substring(header.length), 'base64');
-
-    await Promise.all([
-      server.deleteFile('thumbnail-gen.js'),
-      server.deleteFile(imgFilename),
-      server.deleteFile(htmlFilename),
-    ]);
 
     return bytes;
   }
@@ -215,6 +229,9 @@ main();
       delete this.browser;
       delete this.page;
       delete this.server;
+      await Promise.all([
+        server.deleteFiles,
+      ]);
       await browser.close();
       await server.close();
     }
