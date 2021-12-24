@@ -1137,7 +1137,7 @@ const contributors = ${JSON.stringify(data)};
 };
 
 async function main() {
-  const fetch = await import('node-fetch');
+  globalThis.fetch = await import('node-fetch');
 
   const b = new Builder(settings.outDir, {
     origPath: `${settings.rootFolder}/lessons`,  // english articles
