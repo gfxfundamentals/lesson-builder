@@ -14,6 +14,10 @@ if (parseInt((/^v(\d+)\./).exec(process.version)[1]) < requiredNodeVersion) {
   throw Error(`requires at least node: ${requiredNodeVersion}`);
 }
 
+let fetch = function() {
+  debugger;
+};
+
 module.exports = function(settings) { // wrapper in case we're in module_context mode
 
 const hackyProcessSelectFiles = settings.filenames !== undefined;
@@ -1137,7 +1141,8 @@ const contributors = ${JSON.stringify(data)};
 };
 
 async function main() {
-  globalThis.fetch = await import('node-fetch');
+  const fetchModule = await import('node-fetch');
+  fetch = fetchModule.default;
 
   const b = new Builder(settings.outDir, {
     origPath: `${settings.rootFolder}/lessons`,  // english articles
