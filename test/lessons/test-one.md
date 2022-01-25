@@ -2,13 +2,15 @@ Title: Article One
 Description: Test Article
 TOC: First Article
 
-This is a test
+This is a <span>foo *bar* foo</span> test
+and another <div>foo *bar* foo</div> grr.
 
 ```html
-<div>test<div>
+<div>test *abc*<div>
 ```
 
-<pre class="prettyprint other"><code>
+<pre class="prettyprint other">
+<p>some *not bold* and `not code` stuff<code>
 {{#escapehtml}}<div>
   <div>test</div>
 </div>{{/escapehtml}}
