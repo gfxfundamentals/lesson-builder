@@ -100,7 +100,9 @@ describe('test lesson-builder', () => {
     assertEQ(files[0], 'test/lessons/test-one.md');
   });
 
-  it('builds', async() => {
+  it('builds', async function() {
+    this.timeout(20000);
+
     const buildStuff = require('../../build');
     const outDir = process.env.UPDATE_EXPECTED ? 'test/expected' : 'out';
     const buildSettings = {
