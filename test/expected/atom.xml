@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
-    <id></id>
+    <id/>
     <title>Lesson Builder</title>
     <updated>2021-12-26T08:00:00.000Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
@@ -14,8 +14,7 @@
     <entry>
         <title type="html"><![CDATA[Article One]]></title>
         <id>https://lesson-builder-test.org/test/lessons/test-one.html</id>
-        <link href="https://lesson-builder-test.org/test/lessons/test-one.html">
-        </link>
+        <link href="https://lesson-builder-test.org/test/lessons/test-one.html"/>
         <updated>2021-12-26T08:00:00.000Z</updated>
         <author>
             <name>Lesson Builder Contributors</name>
