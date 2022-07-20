@@ -208,7 +208,7 @@ this.imgHref = `${baseUrl}/${imgFilename}`;
     const settings = {
       ..._settings,
       imgFilename: this.imgHref,
-    }
+    };
     const {page} = this;
 
     const data = await page.evaluate(async(settings) => {

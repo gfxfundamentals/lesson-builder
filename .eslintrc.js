@@ -1,11 +1,10 @@
 'use strict';
 module.exports = {
   'env': {
-    'browser': true,
-    'es6': true,
+    'es2022': true,
   },
   'parserOptions': {
-    'ecmaVersion': 2019,
+    'ecmaVersion': 'latest',
   },
   'plugins': [
     'eslint-plugin-optional-comma-spacing',

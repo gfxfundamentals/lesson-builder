@@ -28,6 +28,7 @@ const enableDestroy = require('server-destroy');
 const EventEmitter = require('events');
 const http = require('http');
 const os = require('os');
+const getUnusedPort = require('./get-unused-port.js');
 
 const debug = process.env.DEBUG ? console.log : () => {};
 
@@ -128,59 +129,64 @@ class Server extends EventEmitter {
     app.use(nonErrorLocalErrorHandler);
     app.use(localErrorHandler);
 
-    let server;
-    let port = settings.port;
-    let started = false;
-    try {
-      debug('starting server');
+    (async() => {
+      let server;
+      let started = false;
 
-      server = http.createServer(app);
-      server.on('error', (e) => {
-        if (!settings.scan || started) {
-          error('ERROR:', e.message);
-          this.emit('error', e);
-          return;
-        }
-        if (settings.scan) {
-          ++port;
-          server.listen(port, hostname);
-        }
-      });
-      server.on('listening', () => {
-        started = true;
-        log(c.yellow(`server started on ${hostname || '::'}${port} for path: ${c.cyan(root)}`));
-        log(c.yellow('available on:'));
-        const protocol = settings.ssl ? 'https://' : 'http://';
-        log(`   ${protocol}localhost:${port}`);
-        if (!hostname) {
-          const iFaces = os.networkInterfaces();
-          Object.keys(iFaces).forEach(function(dev) {
-            iFaces[dev].forEach(function(details) {
-              if (details.family === 'IPv4') {
-                log(`   ${protocol}${details.address}:${port}`);
-              }
-            });
-          });
-        }
-        this.emit('start', {
-          port,
-          protocol,
-          baseUrl: `${protocol}localhost:${port}`,
+      try {
+        debug('starting server');
+
+        let port = await getUnusedPort(settings.port, '127.0.0.1');
+
+        server = http.createServer(app);
+        server.on('error', (e) => {
+          if (!settings.scan || started) {
+            error('ERROR:', e.message);
+            this.emit('error', e);
+            return;
+          }
+          if (settings.scan) {
+            ++port;
+            server.listen(port, hostname);
+          }
         });
-      });
-      server.on('close', () => {
-        this.emit('close');
-      });
-      enableDestroy(server);
-      server.listen(port, hostname);
-    } catch (e) {
-      debug('error starting server');
-      error('ERROR:', e, e.message, e.stack);
-    }
+        server.on('listening', () => {
+          started = true;
+          log(c.yellow(`server started on ${hostname || '::'}${port} for path: ${c.cyan(root)}`));
+          log(c.yellow('available on:'));
+          const protocol = settings.ssl ? 'https://' : 'http://';
+          log(`   ${protocol}localhost:${port}`);
+          if (!hostname) {
+            const iFaces = os.networkInterfaces();
+            Object.keys(iFaces).forEach(function(dev) {
+              iFaces[dev].forEach(function(details) {
+                if (details.family === 'IPv4') {
+                  log(`   ${protocol}${details.address}:${port}`);
+                }
+              });
+            });
+          }
+          this.emit('start', {
+            port,
+            protocol,
+            baseUrl: `${protocol}localhost:${port}`,
+          });
+        });
+        server.on('close', () => {
+          this.emit('close');
+        });
+        enableDestroy(server);
+        server.listen(port, hostname);
+      } catch (e) {
+        debug('error starting server');
+        error('ERROR:', e, e.message, e.stack);
+        this.emit('error', e);
+      }
 
-    this.close = function() {
-      server.destroy();
-    };
+      this.close = function() {
+        server.destroy();
+      };
+    })();
   }
 }
 

@@ -1,4 +1,4 @@
-/* global module require process __dirname */
+/* global module require process console */
 /* eslint no-undef: "error" */
 
 /*
@@ -15,7 +15,8 @@ if (parseInt((/^v(\d+)\./).exec(process.version)[1]) < requiredNodeVersion) {
 }
 
 let fetch = function() {
-  debugger;
+  // we'll replace this later, below.
+  debugger;  // eslint-disable-line no-debugger
 };
 
 module.exports = function(settings) { // wrapper in case we're in module_context mode
@@ -40,6 +41,7 @@ const ThumbnailGenerator = require('./thumbnail');
 
 const g_cacheid = Date.now();
 const packageJSON = JSON.parse(fs.readFileSync('package.json', {encoding: 'utf8'}));
+const URL = url.URL;
 
 colors.enabled = colorSupport.hasBasic;
 
@@ -198,7 +200,7 @@ Handlebars.registerHelper('include', function(filename, options) {
     const varName = options.hash.filename;
     filename = options.data.root[varName];
     if (filename === undefined) {
-      throw new Error(`no value for key "${varName}" in include macro`)
+      throw new Error(`no value for key "${varName}" in include macro`);
     }
     context = {...options.data.root, ...options.hash};
   } else {
@@ -468,7 +470,6 @@ const Builder = function(outBaseDir, options) {
   const toc = readHANSON(settings.tocHanson || 'toc.hanson');
 
   const g_siteThumbnailFilename = path.join(settings.rootFolder, 'lessons', 'resources', settings.thumbnailOptions.thumbnailBackground || settings.siteThumbnail);
-  let g_siteThumbnailImage;
   const g_siteThumbnail = {
     url: `${settings.baseUrl}/${settings.rootFolder}/lessons/resources/${settings.siteThumbnail}`,
     size: sizeOfImage(g_siteThumbnailFilename),
