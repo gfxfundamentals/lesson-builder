@@ -1,5 +1,6 @@
 'use strict';
-//const fs = require('fs');
+const { fstat } = require('fs');
+const fs = require('fs');
 const path = require('path');
 const ThumbnailGenerator = require('../../thumbnail');
 const utils = require('../../utils');
@@ -139,7 +140,9 @@ describe('test lesson-builder', () => {
 
     const diffs = await diffTree('test/expected', outDir);
     if (diffs.exitCode !== 0 || diffs.stderr.length !== 0 || diffs.stdout.length !== 0) {
-      throw new Error(`${diffs.stdout}\n${diffs.stderr}`);
+      const errStr = `\n${diffs.stdout}\n${diffs.stderr}`;
+      const s = errStr.replace(/\n(\n)+/g, '\n');
+      throw new Error(s);
     }
   });
 
