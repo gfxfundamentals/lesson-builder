@@ -76,9 +76,9 @@
 
 
 <p>In any case if we compute the cross product of our <span class="z-axis"><code class="notranslate" translate="no">zAxis</code></span> and
-<span style="color: gray;"><code class="notranslate" translate="no">up</code></span> we&#39;ll get the <span class="x-axis">xAxis</span> for the camera.</p>
+<span style="color: gray;"><code class="notranslate" translate="no">up</code></span> we’ll get the <span class="x-axis">xAxis</span> for the camera.</p>
 <p>And now that we have the <span class="x-axis"><code class="notranslate" translate="no">xAxis</code></span> we can cross the <span class="z-axis"><code class="notranslate" translate="no">zAxis</code></span> and the <span class="x-axis"><code class="notranslate" translate="no">xAxis</code></span>
-which will give us the camera&#39;s <span class="y-axis"><code class="notranslate" translate="no">yAxis</code></span></p>
+which will give us the camera’s <span class="y-axis"><code class="notranslate" translate="no">yAxis</code></span></p>
 <p>Now all we have to do is plug the 3 axes into a matrix. That gives us a
 matrix that will orient something that points at the <code class="notranslate" translate="no">target</code> from the
 <code class="notranslate" translate="no">cameraPosition</code>. We just need to add in the <code class="notranslate" translate="no">position</code></p>
@@ -94,14 +94,14 @@ matrix that will orient something that points at the <code class="notranslate" t
 +----+----+----+----+
 </pre></div>
 
-<p>Here&#39;s the code to compute the cross product of 2 vectors.</p>
+<p>Here’s the code to compute the cross product of 2 vectors.</p>
 <pre class="prettyprint notranslate" translate="no"><code class="lang-js">function cross(a, b) {
   return [a[1] * b[2] - a[2] * b[1],
           a[2] * b[0] - a[0] * b[2],
           a[0] * b[1] - a[1] * b[0]];
 }
 </code></pre>
-<p>Here&#39;s the code to subtract two vectors.</p>
+<p>Here’s the code to subtract two vectors.</p>
 
 </div>
     <div class="lesson-sidebar">

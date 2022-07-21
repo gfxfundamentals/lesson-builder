@@ -634,7 +634,7 @@ const Builder = function(outBaseDir, options) {
     const content = data.content;
     //console.log(JSON.stringify(metaData, undefined, '  '));
     const info = extractHandlebars(content);
-    let html = marked(info.content);
+    let html = marked(info.content).replace(/&#39;/g, '’');
     // HACK! :-(
     // There's probably a way to do this in marked
     html = html.replace(/<pre><code/g, '<pre class="prettyprint notranslate" translate="no"><code');
