@@ -624,6 +624,16 @@ const Builder = function(outBaseDir, options) {
     });
   }
 
+  function showIssue(label, str) {
+    const matches = [...str.matchAll(/^.*?fragment shaders don.*?$/gm)];
+    if (matches.length) {
+      console.log('----->', label);
+      [...matches].forEach((m, i) => {
+        console.log('  ', i, ':', m[0]);
+      });
+    }
+  }
+
   const applyTemplateToContent = async function(templatePath, contentFileName, outFileName, opt_extra, data) {
     // Call prep's Content which parses the HTML. This helps us find missing tags
     // should probably call something else.
@@ -634,7 +644,11 @@ const Builder = function(outBaseDir, options) {
     const content = data.content;
     //console.log(JSON.stringify(metaData, undefined, '  '));
     const info = extractHandlebars(content);
-    let html = marked(info.content).replace(/&#39;/g, '’');
+    showIssue('from md', info.content);
+    let html = marked(info.content);
+    showIssue('after marked', html);
+    html = html.replace(/&#39;/g, '’');
+    showIssue('after replace', html);
     // HACK! :-(
     // There's probably a way to do this in marked
     html = html.replace(/<pre><code/g, '<pre class="prettyprint notranslate" translate="no"><code');
