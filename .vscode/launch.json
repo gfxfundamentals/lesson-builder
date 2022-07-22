@@ -5,6 +5,7 @@
     "version": "0.2.0",
     "configurations": [
 
+
         {
             "type": "pwa-node",
             "request": "launch",
@@ -29,6 +30,19 @@
             "args": [
                 "test/tests",
                 "--grep=thumbnail"
+            ]
+        },
+        {
+            "type": "pwa-node",
+            "request": "launch",
+            "name": "Debug Extractors",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "program": "${workspaceFolder}/node_modules/mocha/bin/mocha",
+            "args": [
+                "test/tests",
+                "--grep=snippets 2"
             ]
         },
         {

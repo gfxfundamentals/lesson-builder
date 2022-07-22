@@ -1,9 +1,7 @@
 'use strict';
-const { fstat } = require('fs');
-const fs = require('fs');
 const path = require('path');
 const ThumbnailGenerator = require('../../thumbnail');
-const utils = require('../../utils');
+const utils = require('../../lib/utils.js');
 
 //const notIt = _ => _;
 

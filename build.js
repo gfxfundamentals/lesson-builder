@@ -28,20 +28,37 @@ const Feed       = require('feed').Feed;
 const fs         = settings.fs || require('fs');
 const Handlebars = require('handlebars');
 const hanson     = require('hanson');
-const marked     = require('marked');
+const md         = require('markdown-it')({
+    html: true,
+    langPrefix: 'lang-',
+    typographer: true,
+    quotes: '“”‘’',
+})
+  .use(require('markdown-it-anchor'), {
+      tabIndex: false,
+      slugify,
+  });
 const path       = require('path');
 const sitemap    = require('sitemap');
-const utils      = require('./utils');
+const utils      = require('./lib/utils');
 const moment     = require('moment');
 const url        = require('url');
 const colors     = require('ansi-colors');
 const colorSupport = require('color-support');
 const sizeOfImage = require('image-size');
 const ThumbnailGenerator = require('./thumbnail');
+const {
+  extractHandlebars,
+  insertHandlebars,
+  extractCodeBlocks,
+  insertCodeBlocks,
+  extractHTMLSnippets,
+  insertHTMLSnippets,
+} = require('./lib/extractors.js');
 
 const g_cacheid = Date.now();
 const packageJSON = JSON.parse(fs.readFileSync('package.json', {encoding: 'utf8'}));
-const URL = url.URL;
+const {URL} = url;
 
 colors.enabled = colorSupport.hasBasic;
 
@@ -67,10 +84,15 @@ function failError(...args) {
   error(...args);
 }
 
-marked.setOptions({
-  rawHtml: true,
-  //pedantic: true,
-});
+
+function slugify(s) {
+  return s
+    .toLowerCase()
+    .trim()
+    .replace(/<[!\/a-z].*?>/ig, '')
+    .replace(/[\u2000-\u206F\u2E00-\u2E7F\\'!"#$%&()*+,./:;<=>?@[\]^`{|}~]/g, '')
+    .replace(/\s/g, '-');
+}
 
 function applyObject(src, dst) {
   Object.keys(src).forEach(function(key) {
@@ -484,45 +506,6 @@ const Builder = function(outBaseDir, options) {
 
   const g_originalByFileName = loadFiles(g_allOriginalArticlesFullPath);
 
-  function extractHandlebars(content) {
-    const tripleRE = /\{\{\{.*?\}\}\}/g;
-    const doubleRE = /\{\{\{.*?\}\}\}/g;
-
-    let numExtractions = 0;
-    const extractions = {
-    };
-
-    function saveHandlebar(match) {
-      const id = '==HANDLEBARS_ID_' + (++numExtractions) + '==';
-      extractions[id] = match;
-      return id;
-    }
-
-    content = content.replace(tripleRE, saveHandlebar);
-    content = content.replace(doubleRE, saveHandlebar);
-
-    return {
-      content: content,
-      extractions: extractions,
-    };
-  }
-
-  function insertHandlebars(info, content) {
-    const handlebarRE = /==HANDLEBARS_ID_\d+==/g;
-
-    function restoreHandlebar(match) {
-      const value = info.extractions[match];
-      if (value === undefined) {
-        throw new Error('no match restoring handlebar for: ' + match);
-      }
-      return value;
-    }
-
-    content = content.replace(handlebarRE, restoreHandlebar);
-
-    return content;
-  }
-
   function isSameDomain(url, pageUrl) {
     const fdq1 = new URL(pageUrl);
     const fdq2 = new URL(url, pageUrl);
@@ -624,15 +607,8 @@ const Builder = function(outBaseDir, options) {
     });
   }
 
-  function showIssue(label, str) {
-    const matches = [...str.matchAll(/^.*?fragment shaders don.*?$/gm)];
-    if (matches.length) {
-      console.log('----->', label);
-      [...matches].forEach((m, i) => {
-        console.log('  ', i, ':', m[0]);
-      });
-    }
-  }
+  //const showContent = (label, content) => console.log(`======================= [ ${label} ] ==============================================\n${content}`);
+  const showContent = _ => _;
 
   const applyTemplateToContent = async function(templatePath, contentFileName, outFileName, opt_extra, data) {
     // Call prep's Content which parses the HTML. This helps us find missing tags
@@ -643,21 +619,29 @@ const Builder = function(outBaseDir, options) {
     const metaData = data.headers;
     const content = data.content;
     //console.log(JSON.stringify(metaData, undefined, '  '));
-    const info = extractHandlebars(content);
-    showIssue('from md', info.content);
-    let html = marked(info.content);
-    showIssue('after marked', html);
-    html = html.replace(/&#39;/g, '’');
-    showIssue('after replace', html);
+    showContent('orig', content);
+    const {handlebars, content: noHandlebarsContent} = extractHandlebars(content);
+    showContent('no handlebars', noHandlebarsContent);
+    const {codeBlocks, content: noCodeBlocksContent} = extractCodeBlocks(noHandlebarsContent);
+    showContent('no codeblocks', noCodeBlocksContent);
+    const {snippets, content: noHTMLContent} = extractHTMLSnippets(noCodeBlocksContent);
+    showContent('no HTML', noHTMLContent);
+    const withCodeblocksContent = insertCodeBlocks(codeBlocks, noHTMLContent);
+    showContent('with codeblocks', withCodeblocksContent);
+    let html = md.render(withCodeblocksContent);
+    showContent('HTML', html);
+    html = insertHTMLSnippets(snippets, html);
     // HACK! :-(
     // There's probably a way to do this in marked
     html = html.replace(/<pre><code/g, '<pre class="prettyprint notranslate" translate="no"><code');
     html = html.replace(/<code>/g, '<code class="notranslate" translate="no">');
+    showContent('with snippets', html);
     // HACK! :-(
     if (opt_extra && opt_extra.home && opt_extra.home.length > 1) {
       html = hackRelLinks(html, pageUrl, contentFileName);
     }
-    html = insertHandlebars(info, html);
+    html = insertHandlebars(handlebars, html);
+    showContent('with handlebars', html);
     html = replaceParams(html, [
       opt_extra,
       g_langInfo,

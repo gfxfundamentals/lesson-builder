@@ -28,7 +28,7 @@ const enableDestroy = require('server-destroy');
 const EventEmitter = require('events');
 const http = require('http');
 const os = require('os');
-const getUnusedPort = require('./get-unused-port.js');
+const getUnusedPort = require('./lib/get-unused-port.js');
 
 const debug = process.env.DEBUG ? console.log : () => {};
 

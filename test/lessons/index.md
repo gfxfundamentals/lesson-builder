@@ -1,7 +1,7 @@
 Title: Lesson Builder
 
 
-#Table of Contents
+# Table of Contents
 
 {{{include "test/lessons/toc.html"}}}
 

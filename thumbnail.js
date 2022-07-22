@@ -4,7 +4,7 @@ const path = require('path');
 const Server = require('./server');
 const puppeteer = require('puppeteer');
 const mime = require('mime-types');
-const { createExposedPromise } = require('./utils');
+const { createExposedPromise } = require('./lib/utils');
 
 const logger = {
   log: console.log.bind(console),

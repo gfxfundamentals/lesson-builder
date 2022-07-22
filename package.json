@@ -13,7 +13,9 @@
     "hanson": "^1.1.1",
     "image-size": "^1.0.2",
     "inmemfilecache": "0.0.6",
-    "marked": "git://github.com/greggman/marked.git#raw-html",
+    "jsdom": "^20.0.0",
+    "markdown-it": "^13.0.1",
+    "markdown-it-anchor": "^8.6.4",
     "mime-types": "^2.1.35",
     "moment": "^2.29.4",
     "node-fetch": "^3.2.9",
@@ -22,6 +24,7 @@
     "sitemap": "git://github.com/greggman/sitemap.js.git#multiple-langs"
   },
   "devDependencies": {
+    "chai": "^4.3.6",
     "diff": "^5.1.0",
     "eslint": "^8.20.0",
     "eslint-plugin-google-camelcase": "0.0.2",
