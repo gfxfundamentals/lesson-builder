@@ -93,7 +93,7 @@ async function diffTree(a, b) {
 
 describe('test lesson-builder', () => {
   it('globs', () => {
-    const {glob}  = require('../../utils');
+    const {glob}  = require('../../lib/utils.js');
     const files = glob('test/lessons/test-*.md');
     assertEQ(files.length, 1);
     assertEQ(files[0], 'test/lessons/test-one.md');
