@@ -1,6 +1,6 @@
 {
   "name": "@gfxfundamentals/lesson-builder",
-  "version": "1.18.2",
+  "version": "1.18.3",
   "description": "Article builder",
   "main": "build.js",
   "dependencies": {
