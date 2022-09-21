@@ -1,3 +1,6 @@
+/* global main */
+// main is referenced here but is injected into puppeteer
+
 'use strict';
 const fs = require('fs');
 const path = require('path');

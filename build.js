@@ -1,4 +1,3 @@
-/* global module require process console */
 /* eslint no-undef: "error" */
 
 /*
@@ -18,6 +17,15 @@ let fetch = function() {
   // we'll replace this later, below.
   debugger;  // eslint-disable-line no-debugger
 };
+
+function slugify(s) {
+  return s
+    .toLowerCase()
+    .trim()
+    .replace(/<[!/a-z].*?>/ig, '')
+    .replace(/[\u2000-\u206F\u2E00-\u2E7F\\'!"#$%&()*+,./:;<=>?@[\]^`{|}~]/g, '')
+    .replace(/\s/g, '-');
+}
 
 module.exports = function(settings) { // wrapper in case we're in module_context mode
 
@@ -82,16 +90,6 @@ let numErrors = 0;
 function failError(...args) {
   ++numErrors;
   error(...args);
-}
-
-
-function slugify(s) {
-  return s
-    .toLowerCase()
-    .trim()
-    .replace(/<[!\/a-z].*?>/ig, '')
-    .replace(/[\u2000-\u206F\u2E00-\u2E7F\\'!"#$%&()*+,./:;<=>?@[\]^`{|}~]/g, '')
-    .replace(/\s/g, '-');
 }
 
 function applyObject(src, dst) {
