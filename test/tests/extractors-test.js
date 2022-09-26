@@ -12,8 +12,9 @@ const {
   //insertHTMLSnippets,
 } = require('../../lib/extractors.js');
 
-//const showContent = (label, content) => console.log(`======================= [ ${label} ] ==============================================\n${content}`);
-const showContent = _ => _;
+const showContent = process.env['SHOW_CONTENT']
+    ? (label, content) => console.log(`======================= [ ${label} ] ==============================================\n${content}`)
+    : _ => _;
 
 describe('extractors', () => {
 

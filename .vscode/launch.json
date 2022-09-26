@@ -16,7 +16,8 @@
             "program": "${workspaceFolder}/node_modules/mocha/bin/mocha",
             "args": [
                 "--timeout", "0",
-                "test/tests"
+                "test/tests",
+                "--grep=builds"
             ]
         },
         {

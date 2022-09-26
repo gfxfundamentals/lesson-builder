@@ -605,8 +605,9 @@ const Builder = function(outBaseDir, options) {
     });
   }
 
-  //const showContent = (label, content) => console.log(`======================= [ ${label} ] ==============================================\n${content}`);
-  const showContent = _ => _;
+  const showContent = process.env['SHOW_CONTENT']
+      ? (label, content) => console.log(`======================= [ ${label} ] ==============================================\n${content}`)
+      : _ => _;
 
   const applyTemplateToContent = async function(templatePath, contentFileName, outFileName, opt_extra, data) {
     // Call prep's Content which parses the HTML. This helps us find missing tags

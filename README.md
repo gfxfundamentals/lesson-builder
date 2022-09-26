@@ -468,6 +468,8 @@ issues.
   that .md file back out. So, be sure your originals are
   checked into git.
 
+* `SHOW_CONTENT`: Set to 1, shows various transformations
+
 ## Testing
 
 I started adding some tests to hopefully make it easy to um, test.
