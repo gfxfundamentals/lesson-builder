@@ -99,6 +99,167 @@ matrix that will orient something that points at the <code class="notranslate" t
 }
 </code></pre>
 <p>Here’s the code to subtract two vectors.</p>
+<hr>
+<h2 id="lets-compare-webgl-to-webgpu">Let’s compare WebGL to WebGPU</h2>
+<h3 id="shaders">Shaders</h3>
+<p>Here is a shader that draws textured, lit, triangles. One in GLSL and the other
+in WGSL.</p>
+<div class="webgpu_center compare"><div><div>GLSL</div><pre class="prettyprint lang-javascript"><code class="notranslate" translate="no">
+const vSrc &#x3D; &#x60;
+uniform mat4 u_worldViewProjection;
+uniform mat4 u_worldInverseTranspose;
+
+attribute vec4 a_position;
+attribute vec3 a_normal;
+attribute vec2 a_texcoord;
+
+varying vec2 v_texCoord;
+varying vec3 v_normal;
+
+void main() {
+  gl_Position &#x3D; u_worldViewProjection * a_position;
+  v_texCoord &#x3D; a_texcoord;
+  v_normal &#x3D; (u_worldInverseTranspose * vec4(a_normal, 0)).xyz;
+}
+&#x60;;
+
+const fSrc &#x3D; &#x60;
+precision highp float;
+
+varying vec2 v_texCoord;
+varying vec3 v_normal;
+
+uniform sampler2D u_diffuse;
+uniform vec3 u_lightDirection;
+
+void main() {
+  vec4 diffuseColor &#x3D; texture2D(u_diffuse, v_texCoord);
+  vec3 a_normal &#x3D; normalize(v_normal);
+  float l &#x3D; dot(a_normal, u_lightDirection) * 0.5 + 0.5;
+  gl_FragColor &#x3D; vec4(diffuseColor.rgb * l, diffuseColor.a);
+}
+&#x60;;
+</code></pre>
+</div><div>
+<div>WGSL</div>
+<pre class="prettyprint lang-javascript"><code class="notranslate" translate="no">
+const shaderSrc &#x3D; &#x60;
+struct VSUniforms {
+  worldViewProjection: mat4x4&lt;f32&gt;,
+  worldInverseTranspose: mat4x4&lt;f32&gt;,
+};
+@group(0) binding(0) var&lt;uniform&gt; vsUniforms: VSUniforms;
+
+struct MyVSInput {
+    @location(0) position: vec4&lt;f32&gt;,
+    @location(1) normal: vec3&lt;f32&gt;,
+    @location(2) texcoord: vec2&lt;f32&gt;,
+};
+
+struct MyVSOutput {
+  @builtin(position) position: vec4&lt;f32&gt;,
+  @location(0) normal: vec3&lt;f32&gt;,
+  @location(1) texcoord: vec2&lt;f32&gt;,
+};
+
+@vertex
+fn myVSMain(v: MyVSInput) -&gt; MyVSOutput {
+  var vsOut: MyVSOutput;
+  vsOut.position &#x3D; vsUniforms.worldViewProjection * v.position;
+  vsOut.normal &#x3D; (vsUniforms.worldInverseTranspose * vec4&lt;f32&gt;(v.normal, 0.0)).xyz;
+  vsOut.texcoord &#x3D; v.texcoord;
+  return vsOut;
+}
+
+struct FSUniforms {
+  lightDirection: vec3&lt;f32&gt;,
+};
+
+@group(0) binding(1) var&lt;uniform&gt; fsUniforms: FSUniforms;
+@group(0) binding(2) var diffuseSampler: sampler;
+@group(0) binding(3) var diffuseTexture: texture_2d&lt;f32&gt;;
+
+@fragment
+fn myFSMain(v: MyVSOutput) -&gt; @location(0) vec4&lt;f32&gt; {
+  var diffuseColor &#x3D; textureSample(diffuseTexture, diffuseSampler, v.texcoord);
+  var a_normal &#x3D; normalize(v.normal);
+  var l &#x3D; dot(a_normal, fsUniforms.lightDirection) * 0.5 + 0.5;
+  return vec4&lt;f32&gt;(diffuseColor.rgb * l, diffuseColor.a);
+}
+&#x60;;
+</code></pre></div></div>
+<p>Notice in many ways they aren’t all that different. The core parts of each
+function are very similar. <code class="notranslate" translate="no">vec4</code> in GLSL becomes <code class="notranslate" translate="no">vec4&lt;f32&gt;</code> in WGSL, <code class="notranslate" translate="no">mat4</code>
+becomes <code class="notranslate" translate="no">mat4x4&lt;f32&gt;</code>.</p>
+<p>GLSL is C/C++ like. WGSL is Rust like. One difference is
+types go on the left in GLSL and on the right in WGSL.</p>
+<div class="webgpu_center compare"><div><div>GLSL</div><pre class="prettyprint lang-javascript"><code class="notranslate" translate="no">
+// declare a variable of type vec4
+vec4 v;
+
+// declare a function of type mat4 that takes a vec3 parameter
+mat4 someFunction(vec3 p) { ... }
+
+// declare a struct
+struct Foo {  vec4: field; }
+</code></pre>
+</div><div>
+<div>WGSL</div>
+<pre class="prettyprint lang-javascript"><code class="notranslate" translate="no">
+// declare a variable of type vec4&lt;f32&gt;
+var v: vec4&lt;f32&gt;;
+
+// declare a function of type mat4x4&lt;f32&gt; that takes a vec3&lt;f32&gt; parameter
+fn someFunction(p: vec3&lt;f32&gt;) &#x3D;&gt; mat4x4&lt;f32&gt; { ... }
+
+// declare a struct
+struct Foo {  field: vec4&lt;f32&gt;; }
+</code></pre></div></div>
+<p>WGSL has the concept that if you do not specify the type of variable it will
+be deduced from the type of the expression on the right whereas GLSL required you to
+always specify the type. In other words in GLSL</p>
+<h3 id="getting-the-api">Getting the API</h3>
+<div class="webgpu_center compare">
+  <div>
+    <div>WebGL</div>
+<pre class="prettyprint lang-javascript"><code class="notranslate" translate="no">
+function main() {
+  const gl &#x3D; document.querySelector(&#x27;canvas&#x27;).getContext(&#x27;webgl&#x27;);
+  if (!gl) {
+    fail(&#x27;need webgl&#x27;);
+    return;
+  }
+}
+
+main();
+</code></pre>
+  </div>
+  <div>
+    <div>WebGPU</div>
+<pre class="prettyprint lang-javascript"><code class="notranslate" translate="no">
+async function main() {
+  const gpu &#x3D; navigator.gpu;
+  if (!gpu) {
+    fail(&#x27;this browser does not support webgpu&#x27;);
+    return;
+  }
+
+  const adapter &#x3D; await gpu.requestAdapter();
+  if (!adapter) {
+    fail(&#x27;this browser appears to support WebGPU but it\&#x27;s disabled&#x27;);
+    return;
+  }
+  const device &#x3D; await adapter.requestDevice();
+
+...
+}
+
+main();
+</code></pre>
+  </div>
+</div>
+<p>Here, <code class="notranslate" translate="no">adapter</code> represents the GPU itself whereas <code class="notranslate" translate="no">device</code> represents
+an instance of the API on that GPU.</p>
 
 </div>
     <div class="lesson-sidebar">

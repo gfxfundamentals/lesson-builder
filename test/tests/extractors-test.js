@@ -4,11 +4,14 @@
 const assert = require('chai').assert;
 
 const {
+//  createSaveCodeBlockFn,
+//  extractIndentedCodeBlocks,
   //extractHandlebars,
   //insertHandlebars,
   extractCodeBlocks,
   //insertCodeBlocks,
   extractHTMLSnippets,
+//  insertCodeBlocks,
   //insertHTMLSnippets,
 } = require('../../lib/extractors.js');
 
@@ -17,7 +20,7 @@ const showContent = process.env['SHOW_CONTENT']
     : _ => _;
 
 describe('extractors', () => {
-
+/*
   it('extracts code blocks', () => {
 const s = `
 
@@ -160,7 +163,7 @@ den IE11 ausgenommen. Wenn du IE11 benutzen möchtest, solltest du einen Transpi
     assert.equal(content, expected);
     assert.deepEqual(codeBlocks, expectedCodeBlocks);
   });
-
+*/
   it('extracts html snippets', () => {
 
 const s = `
@@ -232,4 +235,84 @@ which will give us the camera's <span class="y-axis">==CODEBLOCK_ID_7==</span>
       assert.equal(content, expected);
   });
 
+  /*
+  it('extracts indented code blocks', () => {
+    const content = `
+
+block of text
+
+    code block
+
+    code block continued
+
+1.  head
+
+    text
+
+2.  head
+
+    block of text
+
+        code block
+
+        code block continued
+
+    block of text
+
+3.  head
+
+    4. head
+
+        block of text
+
+            code block
+
+            code block continued
+
+        block of text
+
+    block of text
+
+block of text
+`;
+    const expected = `
+block of text
+
+    ==CODEBLOCK_0==
+
+1.  head
+
+    text
+
+2.  head
+
+    block of text
+
+        ==CODEBLOCK_1==
+
+    block of text
+
+3.  head
+
+    4.  head
+
+        block of text
+
+            ==CODEBLOCK_2==
+
+        block of text
+
+    block of text
+
+block of text
+`;
+    const codeBlocks = [];
+    const saveCodeBlockFn = createSaveCodeBlockFn(codeBlocks);
+    const actual = extractIndentedCodeBlocks(content, saveCodeBlockFn);
+    assert.equal(actual, expected);
+
+    const result = insertCodeBlocks(codeBlocks, actual);
+    assert.equal(result, content);
+  });
+  */
 });
