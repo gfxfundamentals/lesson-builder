@@ -58,10 +58,6 @@ const ThumbnailGenerator = require('./thumbnail');
 const {
   extractHandlebars,
   insertHandlebars,
-  extractCodeBlocks,
-  insertCodeBlocks,
-  extractHTMLSnippets,
-  insertHTMLSnippets,
 } = require('./lib/extractors.js');
 
 const g_cacheid = Date.now();
@@ -621,16 +617,8 @@ const Builder = function(outBaseDir, options) {
     showContent('orig', content);
     const {handlebars, content: noHandlebarsContent} = extractHandlebars(content);
     showContent('no handlebars', noHandlebarsContent);
-//    const {codeBlocks, content: noCodeBlocksContent} = extractCodeBlocks(noHandlebarsContent);
-//    showContent('no codeblocks', noCodeBlocksContent);
-//    const {snippets, content: noHTMLContent} = extractHTMLSnippets(noCodeBlocksContent);
-//    showContent('no HTML', noHTMLContent);
-//    const withCodeblocksContent = insertCodeBlocks(codeBlocks, noHTMLContent);
-//    showContent('with codeblocks', withCodeblocksContent);
-//    let html = md.render(withCodeblocksContent);
     let html = md.render(noHandlebarsContent);
     showContent('HTML', html);
-//    html = insertHTMLSnippets(snippets, html);
     // HACK! :-(
     // There's probably a way to do this in marked
     html = html.replace(/<pre><code/g, '<pre class="prettyprint notranslate" translate="no"><code');
