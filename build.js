@@ -49,7 +49,6 @@ const md         = require('markdown-it')({
 const path       = require('path');
 const sitemap    = require('sitemap');
 const utils      = require('./lib/utils');
-const moment     = require('moment');
 const url        = require('url');
 const colors     = require('ansi-colors');
 const colorSupport = require('color-support');
@@ -929,41 +928,38 @@ const Builder = function(outBaseDir, options) {
           data);
     }
 
-    function utcMomentFromGitLog(result, filename, timeType) {
+    function dateFromGitLog(result, filename, timeType) {
       const dateStr = result.stdout.split('\n')[0].trim();
-      const utcDateStr = dateStr
-        .replace(/"/g, '')   // WTF to these quotes come from!??!
-        .replace(' ', 'T')
-        .replace(' ', '')
-        .replace(/(\d\d)$/, ':$1');
-      const m = moment.utc(utcDateStr);
-      if (m.isValid()) {
-        return m;
+      const seconds = parseInt(dateStr);
+      if (!isNaN(seconds)) {
+        return new Date(seconds * 1000);
       }
       const stat = fs.statSync(filename);
-      return moment(stat[timeType]);
+      return new Date(stat[timeType]);
     }
 
     for (const article of g_articles) {
       {
         const result = await utils.executeP('git', [
             'log',
-            '--format="%ci"',
+            '--format=%cd',
+            '--date=unix',
             '--name-only',
             '--diff-filter=A',
             article.src_file_name,
         ]);
-        article.dateAdded = utcMomentFromGitLog(result, article.src_file_name, 'ctime');
+        article.dateAdded = dateFromGitLog(result, article.src_file_name, 'ctimeMs');
       }
       {
         const result = await utils.executeP('git', [
            'log',
-           '--format="%ci"',
+           '--format=%cd',
+            '--date=unix',
            '--name-only',
            '--max-count=1',
            article.src_file_name,
          ]);
-        article.dateModified = utcMomentFromGitLog(result, article.src_file_name, 'mtime');
+        article.dateModified = dateFromGitLog(result, article.src_file_name, 'mtimeMs');
       }
     }
 
@@ -980,9 +976,9 @@ const Builder = function(outBaseDir, options) {
         description:    g_langInfo.description,
         link:           g_langInfo.link,
         image:          `${settings.baseUrl}/${settings.rootFolder}/lessons/resources/${settings.siteThumbnail}`,
-        date:           settings.feedDate || articles[0].dateModified.toDate(),
-        published:      settings.feedDate || articles[0].dateModified.toDate(),
-        updated:        settings.feedDate || articles[0].dateModified.toDate(),
+        date:           settings.feedDate || articles[0].dateModified,
+        published:      settings.feedDate || articles[0].dateModified,
+        updated:        settings.feedDate || articles[0].dateModified,
         author: {
           name:       `${settings.siteName} Contributors`,
           link:       `${settings.baseUrl}/contributors.html`,
@@ -1002,8 +998,8 @@ const Builder = function(outBaseDir, options) {
           ],
           // contributor: [
           // ],
-          date:           settings.feedDate || article.dateModified.toDate(),
-          published:      settings.feedDate || article.dateAdded.toDate(),
+          date:           settings.feedDate || article.dateModified,
+          published:      settings.feedDate || article.dateAdded,
           // image:          posts[key].image
         });
 

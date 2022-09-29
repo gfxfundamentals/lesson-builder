@@ -16,7 +16,6 @@
     "markdown-it": "^13.0.1",
     "markdown-it-anchor": "^8.6.4",
     "mime-types": "^2.1.35",
-    "moment": "^2.29.4",
     "node-fetch": "^3.2.10",
     "puppeteer": "^15.4.0",
     "server-destroy": "^1.0.1",
