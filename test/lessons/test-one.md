@@ -14,6 +14,11 @@ This is a test
 </div>{{/escapehtml}}
 </code></pre>
 
+<style>
+.x-axis { color: red; }
+.y-axis { color: green; }
+.z-axis { color: blue; }
+</style>
 
 In any case if we compute the cross product of our <span class="z-axis">`zAxis`</span> and
 <span style="color: gray;">`up`</span> we'll get the <span class="x-axis">xAxis</span> for the camera.

@@ -17,6 +17,8 @@
 <meta name="twitter:description" content="{{description}}">
 <meta name="twitter:image:src" content="{{screenshot}}">
 
+<link href="resources/lesson.css" rel="stylesheet">
+
 <script type="application/ld+json">
 {
   "@context":"https://schema.org",
