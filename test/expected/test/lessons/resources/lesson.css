@@ -1,0 +1,21 @@
+.prettyprint {
+  background-color: #def;
+}
+pre>code {
+  background-color: inherit;
+  border-radius: inherit;
+  padding: inherit;
+}
+.compare {
+  display: flex;
+}
+.compare>* { 
+  flex: 1 1 50%;
+  background: #eee;
+  margin: 1em;
+}
+code {
+  background-color: #ddd;
+  border-radius: 0.5em;
+  padding: 0.25em;
+}

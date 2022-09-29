@@ -4,6 +4,7 @@ const path = require('path');
 const ThumbnailGenerator = require('../../thumbnail');
 const utils = require('../../lib/utils.js');
 const { copyFileSync, mkdirSync } = require('fs');
+const MockDate = require('./mock-date.js');
 
 //const notIt = _ => _;
 
@@ -136,9 +137,17 @@ describe('test lesson-builder', () => {
         ],
       },
     };
-    await buildStuff(buildSettings);
-    mkdirSync('out/test/lessons/resources', {recursive: true});
-    copyFileSync('test/lessons/resources/lesson.css', 'out/test/lessons/resources/lesson.css');
+
+    const oldDate = globalThis.Date;
+    try {
+      globalThis.Date = MockDate;
+      await buildStuff(buildSettings);
+    } finally {
+      globalThis.Date = oldDate;
+    }
+
+    mkdirSync(path.join(outDir, 'test/lessons/resources'), {recursive: true});
+    copyFileSync('test/lessons/resources/lesson.css', path.join(outDir, 'test/lessons/resources/lesson.css'));
 
     const diffs = await diffTree('test/expected', outDir);
     if (diffs.exitCode !== 0 || diffs.stderr.length !== 0 || diffs.stdout.length !== 0) {
