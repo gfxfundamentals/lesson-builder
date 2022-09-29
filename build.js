@@ -929,12 +929,14 @@ const Builder = function(outBaseDir, options) {
     }
 
     function dateFromGitLog(result, filename, timeType) {
+      console.log(filename, timeType, `'${result.stdout}`);
       const dateStr = result.stdout.split('\n')[0].trim();
       const seconds = parseInt(dateStr);
       if (!isNaN(seconds)) {
         return new Date(seconds * 1000);
       }
       const stat = fs.statSync(filename);
+      console.log('got date from filename:', stat[timeType]);
       return new Date(stat[timeType]);
     }
 
@@ -954,7 +956,7 @@ const Builder = function(outBaseDir, options) {
         const result = await utils.executeP('git', [
            'log',
            '--format=%cd',
-            '--date=unix',
+           '--date=unix',
            '--name-only',
            '--max-count=1',
            article.src_file_name,
