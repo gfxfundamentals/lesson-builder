@@ -394,11 +394,15 @@ Available to the templates are the following variables.
 
 * `example`: Inserts an example using `example.template`
 
+  ```
   {{{example url="../some-example.html}}}
+  ```
 
   Optionally takes a `caption`, `width`, `height`, `startPane`
 
+  ```
   {{{example url="../example.html" caption="adjust slider" width="500" height="400"}}}
+  ```
 
   Passed to `example.template` are the `width`, `height`, `caption`, `examplePath` (so links are absolute),
   `encodedUrl` in case there is a query string
@@ -451,6 +455,38 @@ Available to the templates are the following variables.
   ```
 
   NOTE: double brackets are required, triple brackets will fail!
+
+## markdown issues / notes
+
+### HTML requires no blank lines
+
+**BAD !!**
+
+```
+<div>
+hello
+
+world
+</div>
+```
+
+Good
+
+```
+<div>
+hello
+world
+</div>
+```
+
+### space at end of line means break
+
+```
+abc<space>
+def
+```
+
+produces `<p>abc<br>def</p>`
 
 ## Debugging 
 
