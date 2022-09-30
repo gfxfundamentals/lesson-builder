@@ -458,7 +458,7 @@ Available to the templates are the following variables.
 
 ## markdown issues / notes
 
-### HTML requires no blank lines
+### HTML blocks (vs inline) requires no blank lines
 
 **BAD !!**
 
@@ -470,6 +470,8 @@ world
 </div>
 ```
 
+### 
+
 Good
 
 ```
@@ -477,6 +479,18 @@ Good
 hello
 world
 </div>
+```
+
+### Inline html infuriatingly has its content parsed as markdown
+
+```
+text <span class="equation">a*b*c</span> text
+```
+
+produces
+
+```
+<p>text <span class="equation">a<em>b</em>c</span> text</p>
 ```
 
 ### space at end of line means break
