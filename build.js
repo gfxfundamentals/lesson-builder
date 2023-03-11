@@ -723,6 +723,9 @@ const Builder = function(outBaseDir, options) {
         link = data.headers.link || data.link;
       } else {
         data = g_originalByFileName[fileName];
+        if (!data) {
+          throw new Error(`original ${fileName} from 'toc.hanson' does not exist`);
+        }
         link = data.headers.link || addLangToLink(data.link);
       }
       const toc = data.headers.toc || data.headers.title;
