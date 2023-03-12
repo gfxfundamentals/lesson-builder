@@ -45,7 +45,8 @@ const md         = require('markdown-it')({
   .use(require('markdown-it-anchor'), {
       tabIndex: false,
       slugify,
-  });
+  })
+  .use(require('markdown-it-footnote'));
 const path       = require('path');
 const sitemap    = require('sitemap');
 const utils      = require('./lib/utils');

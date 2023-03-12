@@ -63,7 +63,9 @@ Here's the code to subtract two vectors.
 ### Shaders
 
 Here is a shader that draws textured, lit, triangles. One in GLSL and the other
-in WGSL.
+in WGSL. [^foo]
+
+[^foo]: It's really foo.
 
 <div class="webgpu_center compare"><div><div>GLSL</div><pre class="prettyprint lang-javascript"><code>{{#escapehtml}}
 const vSrc = `
