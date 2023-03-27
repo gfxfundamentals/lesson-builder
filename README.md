@@ -434,14 +434,14 @@ Available to the templates are the following variables.
   Inside markdown you can insert code using triple backticks
   but sometimes you're embedding code in HTML in which case markdown is not processed.
 
-  To handle that you can use `<escapeHTML>`. Example:
+  To handle that you can use `escapehtml`. Example:
 
   ```html
-  <pre class="prettyprint"><code>{{#escapeHTML}}
+  <pre class="prettyprint"><code>{{#escapehtml}}
     <div>
       <div>foo</div>
     </div>
-  {{/escapeHTML}}</code></pre>
+  {{/escapehtml}}</code></pre>
   ```
 
   which will produce
