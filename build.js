@@ -933,7 +933,7 @@ const Builder = function(outBaseDir, options) {
     }
 
     function dateFromGitLog(result, filename, timeType) {
-      console.log(filename, timeType, `'${result.stdout}`);
+      //console.log(filename, timeType, `'${result.stdout}`);
       const dateStr = result.stdout.split('\n')[0].trim();
       const seconds = parseInt(dateStr);
       if (!isNaN(seconds)) {
