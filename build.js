@@ -1067,6 +1067,7 @@ const Builder = function(outBaseDir, options) {
 
     {
       let data;
+      console.log(`LESSON_BUILDER_ENV: '${process.env.LESSON_BUILDER_ENV}'`);
       if (process.env.LESSON_BUILDER_ENV === 'production') {
         const {owner, repo} = settings;
         const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/contributors`);
