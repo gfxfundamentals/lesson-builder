@@ -801,7 +801,9 @@ const Builder = function(outBaseDir, options) {
   const addArticleByLang = function(article, lang) {
     const filename = path.basename(article.dst_file_name);
     let articleInfo = g_articlesByLang[filename];
-    const url = `${settings.baseUrl}${article.dst_file_name}`;
+    const url = article.link
+       ? `${settings.baseUrl}/${article.link}`
+       : `${settings.baseUrl}${article.dst_file_name}`;
     if (!articleInfo) {
       articleInfo = {
         url: url,
