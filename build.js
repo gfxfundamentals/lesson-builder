@@ -884,7 +884,7 @@ const Builder = function(outBaseDir, options) {
         let show = true;
         transLinks.forEach((link) => {
           link = link
-              .replace(`${options.lang}/`, '')
+              .replace(`/${options.lang}/`, '/')
               .replace(/^..\//, '');
           if (!origLinks.has(link)) {
             if (linkIsIndex(link)) {
