@@ -9,6 +9,9 @@ and another <div>foo *bar* foo</div> grr.
 <div>test *abc*<div>
 ```
 
+<img src="resources/foo.jpg">
+<script type="module" src="bar.js"></script>
+
 <pre class="prettyprint other">
 <p>some *not bold* and `not code` stuff<code>
 {{#escapehtml}}<div>
