@@ -512,6 +512,10 @@ const Builder = function(outBaseDir, options) {
     return q >= 0 ? url.substring(0, q) : url;
   }
 
+  function isRelative(url) {
+    return !url.startsWith('#') && !url.startsWith('/') && !url.includes('://');
+  }
+
   // Try top fix relative links. This *should* only
   // happen in translations
   const iframeLinkRE = /(<iframe[\s\S]*?\s+src=")(.*?)(")/g;
@@ -534,16 +538,15 @@ const Builder = function(outBaseDir, options) {
     //const basedir = path.dirname(contentFileName);
     // console.log('---> pageUrl:', pageUrl);
     function fixRelLink(m, prefix, url, suffix) {
-      if (isSameDomain(url, pageUrl)) {
+      console.log('  url:', url);
+      if (isSameDomain(url, pageUrl) && isRelative(url)) {
         // a link that starts with "../" should be "../../" if it's in a translation
         // a link that starts with "resources" should be "../resources" if it's in a translation
         //const testName = path.join(basedir, url);
         //if (!fs.existsSync(testName)) {
-          if (url.startsWith('../') ||
-              url.startsWith('resources')) {
+          // this needs to be fixed! It should just do all local links?
             // console.log('  url:', url);
             return `${prefix}../${url}${suffix}`;
-          }
         //}
       }
       return m;
