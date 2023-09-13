@@ -21,7 +21,7 @@ I'm not sure it has any features over something like Jekyll except
    No knowledge needed. No special incantations. It just works.
    My, very limited experience with
    Ruby is that Ruby expects many things to be globally installed
-  and you have to use other tools to help you make things local.
+   and you have to use other tools to help you make things local.
 
 2. I think, but I'm probably wrong, that it handles HTML better.
 
