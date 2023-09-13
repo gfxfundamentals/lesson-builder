@@ -1,17 +1,315 @@
-<html>
-<body>
-<title>Article One</title>
-    <h1>Article One</h1>
-  </div>
-  <div class="lesson">
-    <div class="lesson-main">
-      <p>ごめん！この記事はまだ翻訳されていない。<a href="https://github.com/gfxfundamentals/webgl-fundamentals">翻訳してくれますか？</a>! 😄</p>
-<p><a href="/test/lessons/test-one.html">ここに英語版がある</a>.</p>
+<!DOCTYPE html>
+<!-- this file is auto-generated from test/lessons/ja/test-one.md. Do not edited directly -->
+<html lang="ja">
+<head>
+<meta charset="utf-8">
 
+<meta name="description" content="Test Article">
+<meta name="thumbnail" content="https://lesson-builder-test.org/test/lessons/screenshots/test-one_ja.jpg">
+
+<meta property="og:title" content="Article One">
+<meta property="og:image" content="https://lesson-builder-test.org/test/lessons/screenshots/test-one_ja.jpg">
+<meta property="og:description" content="Test Article">
+<meta property="og:url" content="https://lesson-builder-test.org/test/lessons/ja/test-one.html">
+
+<meta name="twitter:title" content="Article One">
+<meta name="twitter:url" content="https://lesson-builder-test.org/test/lessons/ja/test-one.html">
+<meta name="twitter:description" content="Test Article">
+<meta name="twitter:image:src" content="https://lesson-builder-test.org/test/lessons/screenshots/test-one_ja.jpg">
+
+<link href="resources/lesson.css" rel="stylesheet">
+
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@graph":[
+    {
+      "@type":"WebSite",
+      "@id":"https://webgl2fundamentals.org/#website",
+      "url":"https://webgl2fundamentals.org/",
+      "name":"Webgl2Fundamentals"
+    },
+    {
+      "@type":"ImageObject",
+      "@id":"https://lesson-builder-test.org/test/lessons/ja/test-one.html#primaryimage",
+      "url":"https://lesson-builder-test.org/test/lessons/screenshots/test-one_ja.jpg",
+      "width":1200,
+      "height":630
+    },
+    {
+      "@type":"WebPage",
+      "@id":"https://lesson-builder-test.org/test/lessons/ja/test-one.html#webpage",
+      "url":"https://lesson-builder-test.org/test/lessons/ja/test-one.html",
+      "inLanguage":"ja",
+      "name":"Article One",
+      "keywords":"webgl webgl2 graphics programming",
+      "isPartOf":{
+        "@id":"https://webgl2fundamentals.org/#website"
+      },
+      "primaryImageOfPage":{
+        "@id":"https://lesson-builder-test.org/test/lessons/ja/test-one.html#primaryimage"
+      }
+    }
+  ]
+}
+</script>
+
+
+<title>Article One</title>
+
+  <link rel="alternate" hreflang="en" href="https://webglfundamentals.org/test/lessons/test-one.html">
+  <link rel="alternate" hreflang="ja" href="https://webglfundamentals.org/test/lessons/ja/test-one.html">
+
+
+
+
+</head>
+<body>
+<h1>Article One</h1>
+<div class="lesson-main">
+  <p>This is a <span>foo <em>bar</em> foo</span> test
+and another <div>foo <em>bar</em> foo</div> grr.</p>
+<pre class="prettyprint notranslate" translate="no"><code class="lang-html">&lt;div&gt;test *abc*&lt;div&gt;
+</code></pre>
+<img src="../resources/foo.jpg">
+<script type="module" src="../bar.js"></script>
+<pre class="prettyprint other">
+<p>some *not bold* and `not code` stuff<code class="notranslate" translate="no">
+&lt;div&gt;
+  &lt;div&gt;test&lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+<style>
+.x-axis { color: red; }
+.y-axis { color: green; }
+.z-axis { color: blue; }
+</style>
+<p>In any case if we compute the cross product of our <span class="z-axis"><code class="notranslate" translate="no">zAxis</code></span> and
+<span style="color: gray;"><code class="notranslate" translate="no">up</code></span> we’ll get the <span class="x-axis">xAxis</span> for the camera.</p>
+<p>And now that we have the <span class="x-axis"><code class="notranslate" translate="no">xAxis</code></span> we can cross the <span class="z-axis"><code class="notranslate" translate="no">zAxis</code></span> and the <span class="x-axis"><code class="notranslate" translate="no">xAxis</code></span>
+which will give us the camera’s <span class="y-axis"><code class="notranslate" translate="no">yAxis</code></span></p>
+<p>Now all we have to do is plug the 3 axes into a matrix. That gives us a
+matrix that will orient something that points at the <code class="notranslate" translate="no">target</code> from the
+<code class="notranslate" translate="no">cameraPosition</code>. We just need to add in the <code class="notranslate" translate="no">position</code></p>
+<div class="webgl_math_center"><pre class="webgl_math">
++----+----+----+----+
+| <span class="x-axis">Xx</span> | <span class="x-axis">Xy</span> | <span class="x-axis">Xz</span> |  0 |  <- <span class="x-axis">x axis</span>
++----+----+----+----+
+| <span class="y-axis">Yx</span> | <span class="y-axis">Yy</span> | <span class="y-axis">Yz</span> |  0 |  <- <span class="y-axis">y axis</span>
++----+----+----+----+
+| <span class="z-axis">Zx</span> | <span class="z-axis">Zy</span> | <span class="z-axis">Zz</span> |  0 |  <- <span class="z-axis">z axis</span>
++----+----+----+----+
+| Tx | Ty | Tz |  1 |  <- camera position
++----+----+----+----+
+</pre></div>
+<p>Here’s the code to compute the cross product of 2 vectors.</p>
+<pre class="prettyprint notranslate" translate="no"><code class="lang-js">function cross(a, b) {
+  return [a[1] * b[2] - a[2] * b[1],
+          a[2] * b[0] - a[0] * b[2],
+          a[0] * b[1] - a[1] * b[0]];
+}
+</code></pre>
+<p>Here’s the code to subtract two vectors.</p>
+<hr>
+<h2 id="lets-compare-webgl-to-webgpu">Let’s compare WebGL to WebGPU</h2>
+<h3 id="shaders">Shaders</h3>
+<p>Here is a shader that draws textured, lit, triangles. One in GLSL and the other
+in WGSL. <sup class="footnote-ref"><a href="#fn1" id="fnref1">[1]</a></sup></p>
+<div class="webgpu_center compare"><div><div>GLSL</div><pre class="prettyprint lang-javascript"><code class="notranslate" translate="no">
+const vSrc &#x3D; &#x60;
+uniform mat4 u_worldViewProjection;
+uniform mat4 u_worldInverseTranspose;
+
+attribute vec4 a_position;
+attribute vec3 a_normal;
+attribute vec2 a_texcoord;
+
+varying vec2 v_texCoord;
+varying vec3 v_normal;
+
+void main() {
+  gl_Position &#x3D; u_worldViewProjection * a_position;
+  v_texCoord &#x3D; a_texcoord;
+  v_normal &#x3D; (u_worldInverseTranspose * vec4(a_normal, 0)).xyz;
+}
+&#x60;;
+
+const fSrc &#x3D; &#x60;
+precision highp float;
+
+varying vec2 v_texCoord;
+varying vec3 v_normal;
+
+uniform sampler2D u_diffuse;
+uniform vec3 u_lightDirection;
+
+void main() {
+  vec4 diffuseColor &#x3D; texture2D(u_diffuse, v_texCoord);
+  vec3 a_normal &#x3D; normalize(v_normal);
+  float l &#x3D; dot(a_normal, u_lightDirection) * 0.5 + 0.5;
+  gl_FragColor &#x3D; vec4(diffuseColor.rgb * l, diffuseColor.a);
+}
+&#x60;;
+</code></pre>
+</div><div>
+<div>WGSL</div>
+<pre class="prettyprint lang-javascript"><code class="notranslate" translate="no">
+const shaderSrc &#x3D; &#x60;
+struct VSUniforms {
+  worldViewProjection: mat4x4&lt;f32&gt;,
+  worldInverseTranspose: mat4x4&lt;f32&gt;,
+};
+@group(0) binding(0) var&lt;uniform&gt; vsUniforms: VSUniforms;
+
+struct MyVSInput {
+    @location(0) position: vec4&lt;f32&gt;,
+    @location(1) normal: vec3&lt;f32&gt;,
+    @location(2) texcoord: vec2&lt;f32&gt;,
+};
+
+struct MyVSOutput {
+  @builtin(position) position: vec4&lt;f32&gt;,
+  @location(0) normal: vec3&lt;f32&gt;,
+  @location(1) texcoord: vec2&lt;f32&gt;,
+};
+
+@vertex
+fn myVSMain(v: MyVSInput) -&gt; MyVSOutput {
+  var vsOut: MyVSOutput;
+  vsOut.position &#x3D; vsUniforms.worldViewProjection * v.position;
+  vsOut.normal &#x3D; (vsUniforms.worldInverseTranspose * vec4&lt;f32&gt;(v.normal, 0.0)).xyz;
+  vsOut.texcoord &#x3D; v.texcoord;
+  return vsOut;
+}
+
+struct FSUniforms {
+  lightDirection: vec3&lt;f32&gt;,
+};
+
+@group(0) binding(1) var&lt;uniform&gt; fsUniforms: FSUniforms;
+@group(0) binding(2) var diffuseSampler: sampler;
+@group(0) binding(3) var diffuseTexture: texture_2d&lt;f32&gt;;
+
+@fragment
+fn myFSMain(v: MyVSOutput) -&gt; @location(0) vec4&lt;f32&gt; {
+  var diffuseColor &#x3D; textureSample(diffuseTexture, diffuseSampler, v.texcoord);
+  var a_normal &#x3D; normalize(v.normal);
+  var l &#x3D; dot(a_normal, fsUniforms.lightDirection) * 0.5 + 0.5;
+  return vec4&lt;f32&gt;(diffuseColor.rgb * l, diffuseColor.a);
+}
+&#x60;;
+</code></pre></div></div>
+<p>Notice in many ways they aren’t all that different. The core parts of each
+function are very similar. <code class="notranslate" translate="no">vec4</code> in GLSL becomes <code class="notranslate" translate="no">vec4&lt;f32&gt;</code> in WGSL, <code class="notranslate" translate="no">mat4</code>
+becomes <code class="notranslate" translate="no">mat4x4&lt;f32&gt;</code>.</p>
+<p>GLSL is C/C++ like. WGSL is Rust like. One difference is
+types go on the left in GLSL and on the right in WGSL.</p>
+<div class="webgpu_center compare"><div><div>GLSL</div><pre class="prettyprint lang-javascript"><code class="notranslate" translate="no">
+// declare a variable of type vec4
+vec4 v;
+
+// declare a function of type mat4 that takes a vec3 parameter
+mat4 someFunction(vec3 p) { ... }
+
+// declare a struct
+struct Foo {  vec4: field; }
+</code></pre>
+</div><div>
+<div>WGSL</div>
+<pre class="prettyprint lang-javascript"><code class="notranslate" translate="no">
+// declare a variable of type vec4&lt;f32&gt;
+var v: vec4&lt;f32&gt;;
+
+// declare a function of type mat4x4&lt;f32&gt; that takes a vec3&lt;f32&gt; parameter
+fn someFunction(p: vec3&lt;f32&gt;) &#x3D;&gt; mat4x4&lt;f32&gt; { ... }
+
+// declare a struct
+struct Foo {  field: vec4&lt;f32&gt;; }
+</code></pre></div></div>
+<p>WGSL has the concept that if you do not specify the type of variable it will
+be deduced from the type of the expression on the right whereas GLSL required you to
+always specify the type. In other words in GLSL</p>
+<h3 id="getting-the-api">Getting the API</h3>
+<div class="webgpu_center compare">
+  <div>
+    <div>WebGL</div>
+<pre class="prettyprint lang-javascript"><code class="notranslate" translate="no">
+function main() {
+  const gl &#x3D; document.querySelector(&#x27;canvas&#x27;).getContext(&#x27;webgl&#x27;);
+  if (!gl) {
+    fail(&#x27;need webgl&#x27;);
+    return;
+  }
+}
+
+main();
+</code></pre>
+  </div>
+  <div>
+    <div>WebGPU</div>
+<pre class="prettyprint lang-javascript"><code class="notranslate" translate="no">
+async function main() {
+  const gpu &#x3D; navigator.gpu;
+  if (!gpu) {
+    fail(&#x27;this browser does not support webgpu&#x27;);
+    return;
+  }
+
+  const adapter &#x3D; await gpu.requestAdapter();
+  if (!adapter) {
+    fail(&#x27;this browser appears to support WebGPU but it\&#x27;s disabled&#x27;);
+    return;
+  }
+  const device &#x3D; await adapter.requestDevice();
+
+...
+}
+
+main();
+</code></pre>
+  </div>
+</div>
+<p>Here, <code class="notranslate" translate="no">adapter</code> represents the GPU itself whereas <code class="notranslate" translate="no">device</code> represents
+an instance of the API on that GPU.</p>
+<script type="module" src"test-one.js"></script>
+<hr class="footnotes-sep">
+<section class="footnotes">
+<ol class="footnotes-list">
+<li id="fn1" class="footnote-item"><p>It’s really foo. <a href="#fnref1" class="footnote-backref">↩︎</a></p>
+</li>
+</ol>
+</section>
+
+</div>
+    <div class="lesson-sidebar">
+        <select class="language">
+    <option value="/test/lessons/test-one.html" >English</a>
+    <option value="/test/lessons/ja/test-one.html" selected>日本語</a>
+</select>
+
+
+        <div id="toc">
+          <ul>  <li>Lesson Builder</li>
+        <ul>
+          <li><a href="/test/lessons/ja/test-one.html">First Article</a></li>
+        </ul></ul>
+<ul>
+  <li><a href="/docs/">Helper API Docs</a></li>
+  <li><a href="https://twgljs.org">TWGL, A tiny WebGL helper library</a></li>
+  <li><a href="https://github.com/gfxfundamentals/webgl2-fundamentals">github</a></li>
+</ul>
+        </div>
     </div>
   </div>
 </div>
 </body>
+<script>
+const settings = {
+  contribTemplate: "Thank you <a href=\"${html_url}\"><img src=\"${avatar_url}\"> ${login}</a><br>for <a href=\"https://github.com/${owner}/${repo}/commits?author=${login}\">${contributions} contributions</a>",
+  owner: "gfxfundamentals",
+  repo: "lesson-builder",
+};
+</script>
 </html>
 
 

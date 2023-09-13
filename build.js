@@ -538,7 +538,6 @@ const Builder = function(outBaseDir, options) {
     //const basedir = path.dirname(contentFileName);
     // console.log('---> pageUrl:', pageUrl);
     function fixRelLink(m, prefix, url, suffix) {
-      console.log('  url:', url);
       if (isSameDomain(url, pageUrl) && isRelative(url)) {
         // a link that starts with "../" should be "../../" if it's in a translation
         // a link that starts with "resources" should be "../resources" if it's in a translation

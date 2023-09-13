@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <id/>
+    <title>WebGLを基本から学ぶ</title>
+    <updated>2021-12-26T08:00:00.000Z</updated>
+    <generator>https://github.com/jpmonette/feed</generator>
+    <author>
+        <name>Lesson Builder Contributors</name>
+        <uri>https://lesson-builder-test.org/contributors.html</uri>
+    </author>
+    <link rel="alternate" href="https://webglfundamentals.org/"/>
+    <subtitle>この記事はWebGLの基本から教える記事である。</subtitle>
+    <logo>https://lesson-builder-test.org/test/lessons/resources/lesson-builder.png</logo>
+    <entry>
+        <title type="html"><![CDATA[Article One]]></title>
+        <id>https://lesson-builder-test.org/test/lessons/ja/test-one.html</id>
+        <link href="https://lesson-builder-test.org/test/lessons/ja/test-one.html"/>
+        <updated>2021-12-26T08:00:00.000Z</updated>
+        <author>
+            <name>Lesson Builder Contributors</name>
+            <uri>https://lesson-builder-test.org/contributors.html</uri>
+        </author>
+        <published>2021-12-26T08:00:00.000Z</published>
+    </entry>
+</feed>
