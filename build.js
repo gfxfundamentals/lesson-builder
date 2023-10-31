@@ -520,6 +520,7 @@ const Builder = function(outBaseDir, options) {
   // happen in translations
   const iframeLinkRE = /(<iframe[\s\S]*?\s+src=")(.*?)(")/g;
   const imgLinkRE = /(<img[\s\S]*?\s+src=")(.*?)(")/g;
+  const videoLinkRE = /(<video[\s\S]*?\s+src=")(.*?)(")/g;
   const aLinkRE = /(<a[^>]*?\s+href=")(.*?)(")/g;
   const mdLinkRE = /(\[[\s\S]*?\]\()(.*?)(\))/g;
   const handlebarLinkRE = /({{{.*?\s+url=")(.*?)(")/g;
@@ -528,6 +529,7 @@ const Builder = function(outBaseDir, options) {
   const linkREs = [
     iframeLinkRE,
     imgLinkRE,
+    videoLinkRE,
     aLinkRE,
     mdLinkRE,
     handlebarLinkRE,
@@ -553,6 +555,7 @@ const Builder = function(outBaseDir, options) {
 
     return content
         .replace(imgLinkRE, fixRelLink)
+        .replace(videoLinkRE, fixRelLink)
         .replace(aLinkRE, fixRelLink)
         .replace(iframeLinkRE, fixRelLink)
         .replace(scriptLinkRE, fixRelLink)
