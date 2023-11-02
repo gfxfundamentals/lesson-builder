@@ -744,17 +744,38 @@ const Builder = function(outBaseDir, options) {
       return `<li><a href="/${link}">${toc}</a></li>`;
     }
 
+    /*
+    {
+      'section1': [
+        'article1.md',
+        'article2.md',
+      ],
+      'section2': [
+        'article3.md',
+        {
+          subSection: [
+            'article4.md',
+          ],
+        },
+      ],
+    },
+    */
+
     function makeToc(toc) {
-      return `${
-        Object.entries(toc).map(([category, files]) => `  <li>${getLocalizedCategory(category)}</li>
+      function makeTocImpl(entry) {
+        if (Array.isArray(entry)) {
+          return entry.map(makeTocImpl).join('\n');
+        } else if (typeof entry === 'object') {
+          return Object.entries(entry).map(([category, subEntry]) => `  <li>${getLocalizedCategory(category)}</li>
         <ul>
-          ${Array.isArray(files)
-            ? files.map(tocLink).join('\n')
-            : makeToc(files)
-          }
-        </ul>`
-        ).join('\n')
-      }`;
+          ${makeTocImpl(subEntry)}
+        </ul>`).join('\n');
+        } else {
+          return tocLink(entry);
+        }
+      }
+
+      return makeTocImpl(toc);
     }
 
     g_langInfo.tocHtml = `<ul>${makeToc(toc)}</ul>`;
