@@ -59,6 +59,9 @@ const {
   extractHandlebars,
   insertHandlebars,
 } = require('./lib/extractors.js');
+const {
+  dateFromGitLog,
+} = require('./lib/git.js');
 
 const g_cacheid = Date.now();
 const packageJSON = JSON.parse(fs.readFileSync('package.json', {encoding: 'utf8'}));
@@ -960,41 +963,9 @@ const Builder = function(outBaseDir, options) {
           data);
     }
 
-    function dateFromGitLog(result, filename, timeType) {
-      //console.log(filename, timeType, `'${result.stdout}`);
-      const dateStr = result.stdout.split('\n')[0].trim();
-      const seconds = parseInt(dateStr);
-      if (!isNaN(seconds)) {
-        return new Date(seconds * 1000);
-      }
-      const stat = fs.statSync(filename);
-      console.log('got date from filename:', stat[timeType]);
-      return new Date(stat[timeType]);
-    }
-
     for (const article of g_articles) {
-      {
-        const result = await utils.executeP('git', [
-            'log',
-            '--format=%cd',
-            '--date=unix',
-            '--name-only',
-            '--diff-filter=A',
-            article.src_file_name,
-        ]);
-        article.dateAdded = dateFromGitLog(result, article.src_file_name, 'ctimeMs');
-      }
-      {
-        const result = await utils.executeP('git', [
-           'log',
-           '--format=%cd',
-           '--date=unix',
-           '--name-only',
-           '--max-count=1',
-           article.src_file_name,
-         ]);
-        article.dateModified = dateFromGitLog(result, article.src_file_name, 'mtimeMs');
-      }
+      article.dateAdded = await dateFromGitLog(fs, article.src_file_name, 'ctimeMs');
+      article.dateModified = await dateFromGitLog(fs, article.src_file_name, 'mtimeMs');
     }
 
     let articles = g_articles.filter(function(article) {
