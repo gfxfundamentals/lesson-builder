@@ -4,6 +4,10 @@ TOC: First Article
 
 This is a <span>foo *bar* foo</span> test
 and another <div>foo *bar* foo</div> grr.
+Link to [another article](article.html).
+Link to [absolute article](/absoute-article.html).
+Link to [back resource](../resource/back.jpg).
+Link to [forward resource](resource/forward.jpg).
 
 ```html
 <div>test *abc*<div>

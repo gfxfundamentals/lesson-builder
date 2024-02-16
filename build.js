@@ -516,7 +516,13 @@ const Builder = function(outBaseDir, options) {
   }
 
   function isRelative(url) {
-    return !url.startsWith('#') && !url.startsWith('/') && !url.includes('://');
+    return !url.startsWith('#') &&
+           !url.startsWith('/') &&
+           !url.includes('://');
+  }
+
+  function isArticleLink(url) {
+    return !url.includes('/') && url.endsWith('.html');
   }
 
   // Try top fix relative links. This *should* only
@@ -543,7 +549,7 @@ const Builder = function(outBaseDir, options) {
     //const basedir = path.dirname(contentFileName);
     // console.log('---> pageUrl:', pageUrl);
     function fixRelLink(m, prefix, url, suffix) {
-      if (isSameDomain(url, pageUrl) && isRelative(url)) {
+      if (isSameDomain(url, pageUrl) && isRelative(url) && !isArticleLink(url)) {
         // a link that starts with "../" should be "../../" if it's in a translation
         // a link that starts with "resources" should be "../resources" if it's in a translation
         //const testName = path.join(basedir, url);
