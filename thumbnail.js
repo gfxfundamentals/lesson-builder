@@ -81,7 +81,12 @@ class ThumbnailGenerator {
       return this.initPromise.promise;
     }
     this.initPromise = createExposedPromise();
-    this.browser = await puppeteer.launch({dumpio: !!process.env.DEBUG});
+    this.browser = await puppeteer.launch({
+      dumpio: !!process.env.DEBUG,
+      args: [
+        '--no-sandbox',
+      ],
+    });
     this.page = await this.browser.newPage();
 
     /*
