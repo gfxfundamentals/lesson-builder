@@ -522,7 +522,9 @@ const Builder = function(outBaseDir, options) {
   }
 
   function isArticleLink(url) {
-    return !url.includes('/') && url.endsWith('.html');
+    // Handle both regular html links and html links with anchors in them
+    const baseUrl = url.split('#')[0];
+    return !baseUrl.includes('/') && baseUrl.endsWith('.html');
   }
 
   // Try top fix relative links. This *should* only
