@@ -883,7 +883,10 @@ const Builder = function(outBaseDir, options) {
   this.process = async function(options) {
     console.log('Processing Lang: ' + options.lang);  // eslint-disable-line
     g_articles = [];
-    g_langInfo = g_langDB[options.lang].langInfo;
+    g_langInfo = {
+      ...g_langDB['en'].langInfo,
+      ...g_langDB[options.lang].langInfo,
+    };
 
     await applyTemplateToFiles(options.template, path.join(options.lessons, settings.lessonGrep), options);
 
